@@ -1,7 +1,10 @@
+import "./App.css";
+import IndexPage from "./Screens/IndexPage";
+
 function App() {
   return (
     <div className="App">
-     Prasad Malvi
+      <IndexPage />
     </div>
   );
 }
