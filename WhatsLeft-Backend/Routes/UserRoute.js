@@ -7,6 +7,6 @@ const {
 const router = express.Router();
 
 //Route for Register
-router.post("signUp", signUpController);
+router.post("/signUp", signUpController);
 
 module.exports = router;

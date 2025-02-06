@@ -9,8 +9,7 @@ const UserData = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: [true, "Please enter your Vald E-Mail"],
-
+      required: [true, "Please enter your Valid E-Mail"],
       unique: true,
     },
     password: {
@@ -20,19 +19,25 @@ const UserData = new mongoose.Schema(
       max: 60,
     },
     mobileNumber: {
-      type: Number,
-      required: [true, "Please enter your 10 digit number"],
-      min: 10,
-      max: 10,
+      type: String,
+      required: [true, "Please enter your 10-digit number"],
       unique: true,
     },
-    profilePicture: {
-      type: String,
-      default: null,
-    },
+    profilePictures: [
+      {
+        type: String, // URLs of uploaded images
+        required: false,
+      },
+    ],
+    interests: [
+      {
+        type: String,
+        required: false,
+      },
+    ],
     address: {
       type: String,
-      required: [false, "Please Enter Address"],
+      required: false,
     },
   },
   { timestamps: true }

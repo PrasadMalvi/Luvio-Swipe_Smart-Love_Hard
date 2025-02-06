@@ -1,10 +1,13 @@
 const UserData = require("../Models/UserModule");
+const { hashPassword, comparePassword } = require("../Utils/HashedPassowrd");
 const JWT = require("jsonwebtoken");
 
-//Sign-Up
+//Sign-Up Controller
 const signUpController = async (req, res) => {
   try {
-    const { name, email, password, mobileNumber } = req.body;
+    const { name, email, password, mobileNumber, profilePictures, interests } =
+      req.body;
+
     //validation
     if (!name) {
       return res.status(400).send({
@@ -30,8 +33,9 @@ const signUpController = async (req, res) => {
         message: "Please enter your valid 10 digit number",
       });
     }
-    //Existing User
-    const existingUser = await userModel.findOne({ email, mobileNumber });
+
+    //Check if the user is a Existing User
+    const existingUser = await UserData.findOne({ email, mobileNumber });
     if (existingUser) {
       return res.status(500).send({
         success: false,
@@ -40,18 +44,22 @@ const signUpController = async (req, res) => {
     }
 
     //hashedPassowrd
-    const hashedPassowrd = await hashedPassowrd(password);
+    const hashedPassword = await hashPassword(password);
 
     //Save User
-    const user = await UserData({
+    const newUser = new UserData({
       name,
       email,
+      password: hashedPassword,
       mobileNumber,
-      password: hashedPassowrd,
-    }).save();
+      profilePictures, // Accepts multiple image URLs
+      interests, // Array of hobbies/interests
+    });
+
+    await newUser.save();
     return res.status(201).send({
       success: true,
-      message: "Registration Successfull! Please Login",
+      message: "Registration successful! Please log in.",
     });
   } catch (error) {
     console.log(error);
