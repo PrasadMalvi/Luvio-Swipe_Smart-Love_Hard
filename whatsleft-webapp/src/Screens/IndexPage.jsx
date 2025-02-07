@@ -26,7 +26,7 @@ const IndexPage = () => {
           <h1 className="text-5xl font-bold mb-4">Start Swiping Right!</h1>
           <button
             onClick={() => setShowSignUp(true)}
-            className="px-6 py-3 bg-[#b25776] text-white text-lg rounded-full hover:bg-[#e887a9] transition duration-300"
+            className="px-6 py-3 bg-[#b25776] text-white text-xl rounded-full hover:bg-[#e887a9] transition duration-300"
           >
             Sign Up Now
           </button>

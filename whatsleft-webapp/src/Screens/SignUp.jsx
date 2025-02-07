@@ -63,7 +63,7 @@ const SignUp = () => {
           value={formData.name}
           onChange={handleChange}
           required
-          className="w-[350px] ml-5 p-3 border rounded-3xl border-[#b25776] pl-5 focus:outline-none focus:ring-2 focus:ring-[#b25776]"
+          className="w-[350px] ml-8 p-3 border rounded-3xl border-[#b25776] pl-5 focus:outline-none focus:ring-2 focus:ring-[#b25776]"
         />
         <input
           type="email"
@@ -72,7 +72,7 @@ const SignUp = () => {
           value={formData.email}
           onChange={handleChange}
           required
-          className="w-[350px] ml-5 p-3 border rounded-3xl border-[#b25776] focus:outline-none focus:ring-2 focus:ring-[#b25776]"
+          className="w-[350px] ml-8 p-3 border rounded-3xl border-[#b25776] focus:outline-none focus:ring-2 focus:ring-[#b25776]"
         />
         <input
           type="password"
@@ -81,7 +81,7 @@ const SignUp = () => {
           value={formData.password}
           onChange={handleChange}
           required
-          className="w-[350px] ml-5 p-3 border rounded-3xl border-[#b25776] focus:outline-none focus:ring-2 focus:ring-[#b25776]"
+          className="w-[350px] ml-8 p-3 border rounded-3xl border-[#b25776] focus:outline-none focus:ring-2 focus:ring-[#b25776]"
         />
         <input
           type="text"
@@ -90,14 +90,14 @@ const SignUp = () => {
           value={formData.mobileNumber}
           onChange={handleChange}
           required
-          className="w-[350px] ml-5 p-3 border rounded-3xl border-[#b25776] focus:outline-none focus:ring-2 focus:ring-[#b25776]"
+          className="w-[350px] ml-8 p-3 border rounded-3xl border-[#b25776] focus:outline-none focus:ring-2 focus:ring-[#b25776]"
         />
 
         {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}
-          className="w-[350px] ml-5 h-[50px] bg-[#b25776] text-white font-semibold py-2 rounded-3xl mt-2 hover:bg-[#e887a9] transition duration-300"
+          className="w-[350px] ml-8 h-[50px] bg-[#b25776] text-white font-semibold py-2 rounded-3xl mt-2 hover:bg-[#e887a9] transition duration-300"
         >
           {loading ? "Signing Up..." : "Sign Up"}
         </button>

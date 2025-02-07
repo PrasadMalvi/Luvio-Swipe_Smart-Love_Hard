@@ -44,8 +44,8 @@ const NavBar = () => {
         {/* Login Button */}
         <div className="hidden md:block">
           <NavLink
-            to="/login"
-            className="px-12 py-2 rounded-3xl bg-[#b25776] text-white hover:bg-[#e887a9] transition duration-300 text-2xl"
+            to="/signIn"
+            className="px-10 py-3 rounded-3xl bg-[#b25776] text-white h-[60px] hover:bg-[#e887a9] transition duration-300 text-xl"
           >
             Sign In
           </NavLink>
@@ -85,7 +85,7 @@ const NavBar = () => {
           </li>
           <li>
             <NavLink
-              to="/login"
+              to="/signUp"
               className="px-4 py-2 bg-[#b25776] text-white rounded-md hover:bg-blue-700 transition duration-300"
               onClick={() => setIsOpen(false)}
             >

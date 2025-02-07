@@ -192,4 +192,44 @@ const sendOtpController = async (req, res) => {
   }
 };
 
-module.exports = { signUpController, signInController, sendOtpController };
+// Verify OTP Controller
+const verifyOtpController = async (req, res) => {
+  try {
+    const { mobileNumber, otp } = req.body;
+
+    if (!mobileNumber || !otp) {
+      return res.status(400).send({
+        success: false,
+        message: "Mobile number and OTP are required",
+      });
+    }
+
+    // Check if OTP is valid
+    const isOtpValid = otpService.verifyOtp(mobileNumber, otp);
+    if (!isOtpValid) {
+      return res.status(401).send({
+        success: false,
+        message: "Invalid or expired OTP. Please try again.",
+      });
+    }
+
+    return res.status(200).send({
+      success: true,
+      message: "OTP verified successfully!",
+    });
+  } catch (error) {
+    console.error("OTP Verification Error:", error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in OTP verification",
+      error,
+    });
+  }
+};
+
+module.exports = {
+  signUpController,
+  signInController,
+  sendOtpController,
+  verifyOtpController,
+};
