@@ -1,12 +1,19 @@
 const express = require("express");
 const {
   signUpController,
-  loginController,
+  signInController,
+  sendOtpController,
 } = require("../Controller/UserController");
 
 const router = express.Router();
 
-//Route for Register
+// Sign-Up Route
 router.post("/signUp", signUpController);
+
+// Sign-In Route (Email/Password or Mobile/OTP)
+router.post("/signIn", signInController);
+
+// Send OTP Route
+router.post("/send-otp", sendOtpController);
 
 module.exports = router;

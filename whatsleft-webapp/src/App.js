@@ -1,11 +1,12 @@
+import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import IndexPage from "./Screens/IndexPage";
 
 function App() {
   return (
-    <div className="App">
-      <IndexPage />
-    </div>
+    <Routes>
+      <Route path="/" element={<IndexPage />} />
+    </Routes>
   );
 }
 

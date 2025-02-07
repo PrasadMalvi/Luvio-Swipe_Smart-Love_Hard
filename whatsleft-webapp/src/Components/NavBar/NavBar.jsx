@@ -7,12 +7,12 @@ const NavBar = () => {
 
   return (
     <nav className="bg-gradient-to-b from-[#4a4747] to-transparent fixed w-full top-0 z-50 h-20">
-      <div className="container mx-auto flex justify-between items-center px-6 py-3 md:py-4 -mt-5">
+      <div className="container mx-auto flex justify-between items-center px-6 py-3 md:py-4 -mt-4">
         {/* Logo */}
         <NavLink to="/" className="flex items-center">
           <img
             src={require("../Assets/newlogo.png")}
-            className="h-20 w-30" // Increased logo height
+            className="h-20 w-30 " // Increased logo height
             alt="WhatsLeft-logo"
           />
         </NavLink>
