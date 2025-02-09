@@ -6,10 +6,11 @@ const otpService = require("../Utils/OtpService");
 // Sign-Up Controller
 const signUpController = async (req, res) => {
   try {
+    console.log("Incoming Request Data:", req.body); // Log request data
+
     const { name, email, password, mobileNumber, profilePictures, interests } =
       req.body;
 
-    // Validation
     if (
       !name ||
       !email ||
@@ -18,48 +19,61 @@ const signUpController = async (req, res) => {
       !mobileNumber ||
       mobileNumber.length !== 10
     ) {
+      console.log("Validation Failed");
       return res.status(400).send({
         success: false,
-        message:
-          "Please provide valid name, email, password (min 8 chars), and 10-digit mobile number",
+        message: "Invalid input data",
       });
     }
 
-    // Check if the user already exists
     const existingUser = await UserData.findOne({
       $or: [{ email }, { mobileNumber }],
     });
+
     if (existingUser) {
+      console.log("User Already Exists:", existingUser);
       return res.status(409).send({
         success: false,
         message: "User already exists! Please log in.",
       });
     }
 
-    // Hash Password
     const hashedPassword = await hashPassword(password);
 
-    // Save User
     const newUser = new UserData({
       name,
       email,
       password: hashedPassword,
       mobileNumber,
-      profilePictures, // Accepts multiple image URLs
-      interests, // Array of hobbies/interests
+      profilePictures,
+      interests,
     });
 
     await newUser.save();
+
+    const token = JWT.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    console.log("User Created Successfully:", newUser);
+
     return res.status(201).send({
       success: true,
-      message: "Registration successful! Please log in.",
+      message: "Registration successful! Logged in.",
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        mobileNumber: newUser.mobileNumber,
+      },
+      token,
     });
   } catch (error) {
     console.error("Sign-Up Error:", error);
     return res.status(500).send({
       success: false,
       message: "Error in Sign-Up API",
-      error,
+      error: error.message,
     });
   }
 };

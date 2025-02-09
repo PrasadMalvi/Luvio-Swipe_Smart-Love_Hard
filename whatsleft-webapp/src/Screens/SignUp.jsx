@@ -1,7 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -19,20 +21,37 @@ const SignUp = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
+  
     try {
       const response = await axios.post(
-        "http://localhost:5000/Authentication/signUp",
+        "http://localhost:5050/Authentication/signUp",
         formData
       );
-      alert("Registration Successful! Please log in.");
-      setFormData({ name: "", email: "", password: "", mobileNumber: "" });
+    
+      console.log("Full Response Data:", response); // Debugging
+    
+      if (response.data.success) {
+        const { token, user } = response.data;
+    
+        // 🔹 Store token & user details in localStorage
+        localStorage.setItem("authToken", token);
+        localStorage.setItem("user", JSON.stringify(user));
+    
+        alert("Registration Successful! Logged in.");
+        navigate("/homePage");
+      } else {
+        console.error("Unexpected API Response:", response.data);
+        setError("Something went wrong. Please try again.");
+      }
     } catch (err) {
+      console.error("Signup Error:", err.response); // Log error response
       setError(err.response?.data?.message || "Something went wrong");
     }
-
+    
+  
     setLoading(false);
   };
+  
 
   return (
     <div className="flex justify-center items-center h-screen">

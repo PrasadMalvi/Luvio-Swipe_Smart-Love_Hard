@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const SignIn = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +13,15 @@ const SignIn = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [otpSent, setOtpSent] = useState(false);
+  const navigate = useNavigate();
+
+  // 🔹 Check if the user is already logged in (Token Persistence)
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      navigate("/homePage");
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -23,19 +32,16 @@ const SignIn = () => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post("http://localhost:5050/Authentication/signIn", {
+      const res = await axios.post("http://localhost:5050/Authentication/signIn", {
         email: formData.email,
         password: formData.password,
       });
+
+      localStorage.setItem("authToken", res.data.token); // Save Token
       alert("Sign-in successful! Redirecting...");
-      window.location.href = "/homePage"; // Redirect to home page
+      navigate("/homePage");
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong");
-      console.log("Sending Email Sign-in Data:", {
-        email: formData.email,
-        password: formData.password,
-      });
-      
     }
     setLoading(false);
   };
@@ -60,12 +66,14 @@ const SignIn = () => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post("http://localhost:5050/Authentication/verifyOtp", {
+      const res = await axios.post("http://localhost:5050/Authentication/verifyOtp", {
         mobileNumber: formData.mobileNumber,
         otp: formData.otp,
       });
+
+      localStorage.setItem("authToken", res.data.token); // Save Token
       alert("Sign-in successful! Redirecting...");
-      window.location.href = "/homePage"; // Redirect to home page
+      navigate("/homePage");
     } catch (err) {
       setError(err.response?.data?.message || "Invalid OTP");
     }
@@ -88,16 +96,14 @@ const SignIn = () => {
       {/* Content Wrapper */}
       <div className="relative flex flex-col items-center justify-center h-full bg-black bg-opacity-60">
         
-        
-
         {/* Form Card */}
         <div className="bg-white bg-opacity-90 p-10 rounded-lg shadow-lg w-[500px] ">
-            {/* Logo */}
-        <img
-          src={require("../Components/Assets/logo5.png")}
-          className="h-[150px] w-auto mb-6 ml-20"
-          alt="Logo"
-        />
+          {/* Logo */}
+          <img
+            src={require("../Components/Assets/logo5.png")}
+            className="h-[150px] w-auto mb-6 ml-20"
+            alt="Logo"
+          />
           <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
             Welcome! Log in to find your match.
           </h2>
@@ -131,7 +137,7 @@ const SignIn = () => {
           )}
 
           {method === "email" && (
-            <form onSubmit={handleEmailSignIn} className="flex flex-col space-y-4 w-[350px] ml-12 mb-10" >
+            <form onSubmit={handleEmailSignIn} className="flex flex-col space-y-4 w-[350px] ml-12 mb-10">
               <input
                 type="email"
                 name="email"
@@ -139,7 +145,7 @@ const SignIn = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="p-3 border rounded-3xl border-[#b25776] focus:outline-none focus:ring-2w-[350px] -ml-2  focus:ring-[#b25776]"
+                className="p-3 border rounded-3xl border-[#b25776] focus:outline-none focus:ring-2 focus:ring-[#b25776] w-[350px] -ml-2"
               />
               <input
                 type="password"
@@ -153,7 +159,7 @@ const SignIn = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="h-[50px] bg-[#b25776] text-white font-semibold py-2 rounded-3xl hover:bg-[#e887a9] transition duration-300 w-[350px] -ml-2  mb-10"
+                className="h-[50px] bg-[#b25776] text-white font-semibold py-2 rounded-3xl hover:bg-[#e887a9] transition duration-300 w-[350px] -ml-2 mb-10"
               >
                 {loading ? "Signing In..." : "Continue"}
               </button>
@@ -178,8 +184,7 @@ const SignIn = () => {
                   disabled={loading}
                   className="w-full h-[50px] bg-[#b25776] text-white font-semibold py-2 rounded-3xl hover:bg-[#e887a9] transition duration-300"
                 >
-                  {loading ? "Sending OTP..." : "Send OTP"
-                  }
+                  {loading ? "Sending OTP..." : "Send OTP"}
                 </button>
               ) : (
                 <form onSubmit={handleVerifyOtp} className="flex flex-col space-y-4">
@@ -204,9 +209,7 @@ const SignIn = () => {
             </div>
           )}
         </div>
-        <div className="mt-20 text-white">By signing up, you agree to our <Link className="underline underline-offset-1">Terms</Link>. See how we use your data in our <Link className="underline underline-offset-1">Privacy Policy</Link>.</div>
       </div>
-      
     </div>
   );
 };

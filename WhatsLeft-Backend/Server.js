@@ -14,6 +14,7 @@ app.use(cors());
 
 //Routes
 app.use("/Authentication", require("./Routes/UserRoute"));
+app.use("/Swipe", require("./Routes/SwipeRoute"));
 
 app.listen(PORT, () => {
   console.log(`Server running on PORT ${PORT}`);
