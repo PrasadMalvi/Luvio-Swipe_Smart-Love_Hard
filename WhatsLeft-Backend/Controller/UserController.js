@@ -6,23 +6,33 @@ const otpService = require("../Utils/OtpService");
 // Sign-Up Controller
 const signUpController = async (req, res) => {
   try {
-    console.log("Incoming Request Data:", req.body); // Log request data
-
-    const { name, email, password, mobileNumber, profilePictures, interests } =
-      req.body;
+    const {
+      name,
+      age,
+      email,
+      password,
+      mobileNumber,
+      profilePictures,
+      location,
+      occupation,
+      interests,
+      hobbies,
+      aboutMe,
+      education,
+    } = req.body;
 
     if (
       !name ||
+      !age ||
       !email ||
       !password ||
-      password.length < 8 ||
       !mobileNumber ||
-      mobileNumber.length !== 10
+      !profilePictures ||
+      profilePictures.length < 4
     ) {
-      console.log("Validation Failed");
-      return res.status(400).send({
+      return res.status(400).json({
         success: false,
-        message: "Invalid input data",
+        message: "Please provide all required details.",
       });
     }
 
@@ -31,8 +41,7 @@ const signUpController = async (req, res) => {
     });
 
     if (existingUser) {
-      console.log("User Already Exists:", existingUser);
-      return res.status(409).send({
+      return res.status(409).json({
         success: false,
         message: "User already exists! Please log in.",
       });
@@ -42,11 +51,17 @@ const signUpController = async (req, res) => {
 
     const newUser = new UserData({
       name,
+      age,
       email,
       password: hashedPassword,
       mobileNumber,
       profilePictures,
+      location,
+      occupation,
       interests,
+      hobbies,
+      aboutMe,
+      education,
     });
 
     await newUser.save();
@@ -55,11 +70,9 @@ const signUpController = async (req, res) => {
       expiresIn: "7d",
     });
 
-    console.log("User Created Successfully:", newUser);
-
-    return res.status(201).send({
+    return res.status(201).json({
       success: true,
-      message: "Registration successful! Logged in.",
+      message: "Registration successful!",
       user: {
         id: newUser._id,
         name: newUser.name,
@@ -69,8 +82,7 @@ const signUpController = async (req, res) => {
       token,
     });
   } catch (error) {
-    console.error("Sign-Up Error:", error);
-    return res.status(500).send({
+    return res.status(500).json({
       success: false,
       message: "Error in Sign-Up API",
       error: error.message,

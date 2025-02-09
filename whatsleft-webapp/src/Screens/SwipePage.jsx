@@ -14,7 +14,7 @@ const SwipePage = () => {
     const fetchUsers = async () => {
       try {
         const token = localStorage.getItem("authToken"); // Get token
-        const response = await axios.get("http://localhost:5050/Get/getUsers", {
+        const response = await axios.get("http://localhost:5050/Swipe/getUsers", {
           headers: { Authorization: `Bearer ${token}` },
         });
 

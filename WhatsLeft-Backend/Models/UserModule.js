@@ -2,43 +2,23 @@ const mongoose = require("mongoose");
 
 const UserData = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: [true, "Please enter your name"],
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: [true, "Please enter your Valid E-Mail"],
-      unique: true,
-    },
-    password: {
-      type: String,
-      required: [true, "Please enter your Password"],
-      min: 8,
-      max: 60,
-    },
-    mobileNumber: {
-      type: String,
-      required: [true, "Please enter your 10-digit number"],
-      unique: true,
-    },
-    profilePictures: [
-      {
-        type: String, // URLs of uploaded images
-        required: false,
-      },
-    ],
-    interests: [
-      {
-        type: String,
-        required: false,
-      },
-    ],
-    address: {
-      type: String,
-      required: false,
-    },
+    name: { type: String, required: true },
+    age: { type: Date, required: true }, // Date of birth
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    mobileNumber: { type: String, required: true, unique: true },
+    profilePictures: {
+      type: [String],
+      required: true,
+      minLength: 4,
+      maxLength: 10,
+    }, // At least 4 images
+    location: { type: String, required: true },
+    occupation: { type: String, required: true },
+    interests: { type: [String], required: true }, // Array for multiple selections
+    hobbies: { type: [String], required: true }, // Array for multiple selections
+    aboutMe: { type: String, required: true, maxLength: 500 },
+    education: { type: String, required: true },
   },
   { timestamps: true }
 );
