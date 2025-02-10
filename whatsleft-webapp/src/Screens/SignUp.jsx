@@ -22,6 +22,7 @@ const SignUp = () => {
     lookingFor: "",
     interests: [],
     hobbies: [],
+    aboutMe: "",
   });
 
   const [previewImages, setPreviewImages] = useState([]);
@@ -39,6 +40,7 @@ const SignUp = () => {
     }
     setFormData({ ...formData, profilePics: files });
     setPreviewImages(files.map((file) => URL.createObjectURL(file)));
+    setError(null);
   };
 
   const handleMultiSelectChange = (e) => {
@@ -46,25 +48,32 @@ const SignUp = () => {
     const selectedValues = Array.from(options)
       .filter((option) => option.selected)
       .map((option) => option.value);
-    setFormData({ ...formData, [name]: selectedValues });
+
+    setFormData((prev) => ({ ...prev, [name]: selectedValues }));
   };
 
   const validateStep = () => {
-    if (step === 1 && (!formData.name || !formData.email || !formData.mobileNumber || !formData.password)) {
-      setError("All fields are required.");
-      return false;
+    if (step === 1) {
+      if (!formData.name || !formData.email || !formData.mobileNumber || !formData.password) {
+        setError("All fields are required in Basic Info.");
+        return false;
+      }
     }
     if (step === 2 && formData.profilePics.length < 4) {
       setError("You must upload at least 4 profile pictures.");
       return false;
     }
-    if (step === 3 && (!formData.age || !formData.location || !formData.qualification || !formData.occupation)) {
-      setError("All fields are required.");
-      return false;
+    if (step === 3) {
+      if (!formData.age || !formData.location || !formData.qualification || !formData.occupation) {
+        setError("All fields are required in Personal Details.");
+        return false;
+      }
     }
-    if (step === 4 && (!formData.relationshipPreference || !formData.lookingFor || formData.interests.length === 0 || formData.hobbies.length === 0)) {
-      setError("All fields are required.");
-      return false;
+    if (step === 4) {
+      if (!formData.relationshipPreference || !formData.lookingFor || formData.interests.length === 0 || formData.hobbies.length === 0) {
+        setError("All fields are required in Preferences & Interests.");
+        return false;
+      }
     }
     setError(null);
     return true;
@@ -82,25 +91,27 @@ const SignUp = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
+  
     try {
       const data = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
         if (key === "profilePics") {
-          value.forEach((file) => data.append("profilePics", file));
+          value.forEach((file) => data.append("profilePics", file)); // Ensure each file is appended separately
         } else if (Array.isArray(value)) {
-          data.append(key, JSON.stringify(value));
+          data.append(key, JSON.stringify(value)); // Convert arrays to JSON string
         } else {
           data.append(key, value);
         }
       });
-
+  
+      console.log("Submitting Data:", data); // Debugging
+  
       const response = await axios.post(
         "http://localhost:5050/Authentication/signUp",
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
-
+  
       if (response.data.success) {
         localStorage.setItem("token", response.data.token);
         alert("Registration Successful!");
@@ -111,12 +122,14 @@ const SignUp = () => {
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong");
     }
+  
     setLoading(false);
   };
+  
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form className="p-8 rounded-lg bg-white shadow-lg w-[500px] flex flex-col space-y-4" onSubmit={handleSubmit}>
+    <div className="flex justify-center items-center min-h-screen bg-transparent">
+      <form className="p-8 rounded-lg bg-white shadow-lg w-[500px] h-[550px] flex flex-col space-y-4" onSubmit={handleSubmit}>
         <img src={logo} alt="Logo" className="w-20 mx-auto" />
         <h2 className="text-2xl font-bold text-center text-gray-800">
           {["Basic Info", "Profile Pictures", "Personal Details", "Preferences & Interests"][step - 1]}
@@ -147,25 +160,81 @@ const SignUp = () => {
           <>
             <input type="date" name="age" value={formData.age} onChange={handleChange} className="w-full p-3 border rounded-lg" required />
             <input type="text" name="location" placeholder="Location" value={formData.location} onChange={handleChange} className="w-full p-3 border rounded-lg" required />
+            <input type="text" name="qualification" placeholder="Education" value={formData.qualification} onChange={handleChange} className="w-full p-3 border rounded-lg" required />
             <input type="text" name="occupation" placeholder="Occupation" value={formData.occupation} onChange={handleChange} className="w-full p-3 border rounded-lg" required />
           </>
         )}
 
-        {/* Step 4: Preferences & Interests */}
-        {step === 4 && (
+         {/* Step 4: Preferences & Interests */}
+         {step === 4 && (
           <>
-            <select name="relationshipPreference" value={formData.relationshipPreference} onChange={handleChange} className="w-full p-3 border rounded-lg">
+          <textarea
+  name="aboutMe"
+  placeholder="Tell us about yourself"
+  value={formData.aboutMe}
+  onChange={handleChange}
+  className="w-full p-3 border rounded-lg"
+  required
+/>
+
+            <select
+              name="relationshipPreference"
+              value={formData.relationshipPreference}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-lg"
+            >
               <option value="">Select Relationship Preference</option>
               <option value="Monogamy">Monogamy</option>
               <option value="Polygamy">Polygamy</option>
+              <option value="Open to Explore">Open to Explore</option>
+              <option value="Ethical Non-Monogamy">Ethical Non-Monogamy</option>
             </select>
+
+            <select
+              name="lookingFor"
+              value={formData.lookingFor}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-lg"
+            >
+              <option value="">Looking For</option>
+              <option value="Long-term">Long-term</option>
+              <option value="Short-term">Short-term</option>
+              <option value="New Friends">New Friends</option>
+              <option value="Figuring Out">Figuring Out</option>
+            </select>
+
+            <select
+              name="interests"
+              value={formData.interests}
+              onChange={handleMultiSelectChange}
+              className="w-full p-3 border rounded-lg"
+            >
+              <option value="Music">Music</option>
+              <option value="Sports">Sports</option>
+              <option value="Traveling">Traveling</option>
+              <option value="Gaming">Gaming</option>
+              <option value="Fitness">Fitness</option>
+            </select>
+
+            <select
+              name="hobbies"
+              value={formData.hobbies}
+              onChange={handleMultiSelectChange}
+              className="w-full p-3 border rounded-lg"
+            >
+              <option value="Reading">Reading</option>
+              <option value="Cooking">Cooking</option>
+              <option value="Dancing">Dancing</option>
+              <option value="Painting">Painting</option>
+              <option value="Photography">Photography</option>
+            </select>
+            
           </>
         )}
 
-        {/* Navigation Buttons */}
         <div className="flex justify-between">
-          {step > 1 && <button type="button" onClick={prevStep} className="bg-gray-600 text-white px-4 py-2 rounded-lg">Back</button>}
-          {step < 4 ? <button type="button" onClick={nextStep} className="bg-yellow-500 text-white px-4 py-2 rounded-lg">Next</button> : <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded-lg">{loading ? "Submitting..." : "Submit"}</button>}
+          {step > 1 && <button type="button" onClick={prevStep} className="bg-gray-500 text-white px-4 py-2 rounded-lg">Back</button>}
+          {step < 4 ? <button type="button" onClick={nextStep} className="bg-[#b25776] text-white px-4 py-2 rounded-lg">Next</button> : <button type="submit" className="bg-[#b25776] text-white px-4 py-2 rounded-lg">{loading ? "Submitting..." : "Submit"}</button>}
         </div>
       </form>
     </div>

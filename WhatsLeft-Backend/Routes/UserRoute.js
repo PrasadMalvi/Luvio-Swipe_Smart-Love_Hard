@@ -1,4 +1,5 @@
 const express = require("express");
+const upload = require("../Middleware/ProifileImageUpload");
 const {
   signUpController,
   signInController,
@@ -9,7 +10,7 @@ const {
 const router = express.Router();
 
 // Sign-Up Route
-router.post("/signUp", signUpController);
+router.post("/signUp", upload.array("profilePics", 4), signUpController);
 
 // Sign-In Route (Email/Password or Mobile/OTP)
 router.post("/signIn", signInController);

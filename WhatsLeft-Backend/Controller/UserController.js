@@ -6,36 +6,55 @@ const otpService = require("../Utils/OtpService");
 // Sign-Up Controller
 const signUpController = async (req, res) => {
   try {
+    console.log("Received Request:", req.body, req.files); // Debugging
+
     const {
       name,
-      age,
       email,
       password,
       mobileNumber,
-      profilePictures,
+      age,
       location,
       occupation,
-      interests,
-      hobbies,
       aboutMe,
       education,
+      relationshipPreference,
+      lookingFor,
+      interests,
+      hobbies,
     } = req.body;
+
+    // Parsing interests and hobbies from JSON string (sent from frontend)
+    const parsedInterests = interests ? JSON.parse(interests) : [];
+    const parsedHobbies = hobbies ? JSON.parse(hobbies) : [];
+
+    // Handling profile picture uploads
+    const profilePictures = req.files?.map((file) => file.path) || [];
 
     if (
       !name ||
-      !age ||
       !email ||
       !password ||
       !mobileNumber ||
-      !profilePictures ||
+      !age ||
+      !location ||
+      !occupation ||
+      !aboutMe ||
+      !education ||
+      !relationshipPreference ||
+      !lookingFor ||
+      parsedInterests.length === 0 ||
+      parsedHobbies.length === 0 ||
       profilePictures.length < 4
     ) {
       return res.status(400).json({
         success: false,
-        message: "Please provide all required details.",
+        message:
+          "Please provide all required details, including at least 4 profile pictures.",
       });
     }
 
+    // Checking if user already exists
     const existingUser = await UserData.findOne({
       $or: [{ email }, { mobileNumber }],
     });
@@ -47,25 +66,30 @@ const signUpController = async (req, res) => {
       });
     }
 
+    // Hash password
     const hashedPassword = await hashPassword(password);
 
+    // Create new user
     const newUser = new UserData({
       name,
-      age,
       email,
       password: hashedPassword,
       mobileNumber,
-      profilePictures,
+      age,
       location,
       occupation,
-      interests,
-      hobbies,
       aboutMe,
       education,
+      relationshipPreference,
+      lookingFor,
+      interests: parsedInterests,
+      hobbies: parsedHobbies,
+      profilePictures, // Array of uploaded file URLs
     });
 
     await newUser.save();
 
+    // Generate JWT token
     const token = JWT.sign({ id: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
@@ -82,6 +106,7 @@ const signUpController = async (req, res) => {
       token,
     });
   } catch (error) {
+    console.error("Sign-Up Error:", error);
     return res.status(500).json({
       success: false,
       message: "Error in Sign-Up API",
