@@ -13,12 +13,16 @@ const UserData = new mongoose.Schema(
       minLength: 4,
       maxLength: 10,
     }, // At least 4 images
+    relationshipPreference: {
+      type: String,
+      required: true,
+    },
     location: { type: String, required: true },
     occupation: { type: String, required: true },
     interests: { type: [String], required: true }, // Array for multiple selections
     hobbies: { type: [String], required: true }, // Array for multiple selections
     aboutMe: { type: String, required: true, maxLength: 500 },
-    education: { type: String, required: true },
+    qualification: { type: String, required: true },
   },
   { timestamps: true }
 );

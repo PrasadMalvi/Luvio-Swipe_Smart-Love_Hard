@@ -17,44 +17,108 @@ const signUpController = async (req, res) => {
       location,
       occupation,
       aboutMe,
-      education,
+      qualification,
       relationshipPreference,
       lookingFor,
       interests,
       hobbies,
     } = req.body;
 
-    // Parsing interests and hobbies from JSON string (sent from frontend)
+    // Ensure arrays are parsed correctly
     const parsedInterests = interests ? JSON.parse(interests) : [];
     const parsedHobbies = hobbies ? JSON.parse(hobbies) : [];
 
     // Handling profile picture uploads
     const profilePictures = req.files?.map((file) => file.path) || [];
 
-    if (
-      !name ||
-      !email ||
-      !password ||
-      !mobileNumber ||
-      !age ||
-      !location ||
-      !occupation ||
-      !aboutMe ||
-      !education ||
-      !relationshipPreference ||
-      !lookingFor ||
-      parsedInterests.length === 0 ||
-      parsedHobbies.length === 0 ||
-      profilePictures.length < 4
-    ) {
+    if (!name) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Name is required." });
+    }
+
+    if (!email) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email is required." });
+    }
+
+    if (!password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Password is required." });
+    }
+
+    if (!mobileNumber) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Mobile number is required." });
+    }
+
+    if (!age) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Age is required." });
+    }
+
+    if (!location) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Location is required." });
+    }
+
+    if (!occupation) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Occupation is required." });
+    }
+
+    if (!aboutMe) {
+      return res
+        .status(400)
+        .json({ success: false, message: "About Me section is required." });
+    }
+
+    if (!qualification) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Qualification is required." });
+    }
+
+    if (!relationshipPreference) {
       return res.status(400).json({
         success: false,
-        message:
-          "Please provide all required details, including at least 4 profile pictures.",
+        message: "Relationship preference is required.",
       });
     }
 
-    // Checking if user already exists
+    if (!lookingFor) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Looking for field is required." });
+    }
+
+    if (!parsedInterests || parsedInterests.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one interest is required.",
+      });
+    }
+
+    if (!parsedHobbies || parsedHobbies.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "At least one hobby is required." });
+    }
+
+    if (!profilePictures || profilePictures.length < 4) {
+      return res.status(400).json({
+        success: false,
+        message: "At least 4 profile pictures are required.",
+      });
+    }
+
+    // Check if user exists
     const existingUser = await UserData.findOne({
       $or: [{ email }, { mobileNumber }],
     });
@@ -69,7 +133,7 @@ const signUpController = async (req, res) => {
     // Hash password
     const hashedPassword = await hashPassword(password);
 
-    // Create new user
+    // Save user
     const newUser = new UserData({
       name,
       email,
@@ -79,17 +143,17 @@ const signUpController = async (req, res) => {
       location,
       occupation,
       aboutMe,
-      education,
+      qualification,
       relationshipPreference,
       lookingFor,
       interests: parsedInterests,
       hobbies: parsedHobbies,
-      profilePictures, // Array of uploaded file URLs
+      profilePictures,
     });
 
     await newUser.save();
 
-    // Generate JWT token
+    // Generate JWT
     const token = JWT.sign({ id: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
@@ -97,21 +161,14 @@ const signUpController = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Registration successful!",
-      user: {
-        id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        mobileNumber: newUser.mobileNumber,
-      },
+      user: { id: newUser._id, name: newUser.name, email: newUser.email },
       token,
     });
   } catch (error) {
     console.error("Sign-Up Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Error in Sign-Up API",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ success: false, message: "Error in Sign-Up API" });
   }
 };
 

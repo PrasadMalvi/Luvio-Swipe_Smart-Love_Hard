@@ -1,5 +1,4 @@
 const express = require("express");
-const upload = require("../Middleware/ProifileImageUpload");
 const {
   signUpController,
   signInController,
@@ -8,17 +7,24 @@ const {
 } = require("../Controller/UserController");
 
 const router = express.Router();
+const multer = require("multer");
 
-// Sign-Up Route
-router.post("/signUp", upload.array("profilePics", 4), signUpController);
+// Configure Multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/"); // Ensure this folder exists
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
 
-// Sign-In Route (Email/Password or Mobile/OTP)
+const upload = multer({ storage: storage });
+
+// Corrected: Ensure `profileImage` is used correctly
+router.post("/signUp", upload.array("profileImage", 5), signUpController);
 router.post("/signIn", signInController);
-
-// Send OTP Route
 router.post("/send-otp", sendOtpController);
-
-//TOverufy the OTP
 router.post("/verifyOtp", verifyOtpController);
 
 module.exports = router;

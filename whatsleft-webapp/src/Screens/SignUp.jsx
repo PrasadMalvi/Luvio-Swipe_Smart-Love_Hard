@@ -13,7 +13,7 @@ const SignUp = () => {
     email: "",
     password: "",
     mobileNumber: "",
-    profilePics: [],
+    profileImage: [],
     age: "",
     location: "",
     qualification: "",
@@ -38,7 +38,7 @@ const SignUp = () => {
       setError("You must upload at least 4 profile pictures.");
       return;
     }
-    setFormData({ ...formData, profilePics: files });
+    setFormData({ ...formData, profileImage: files });
     setPreviewImages(files.map((file) => URL.createObjectURL(file)));
     setError(null);
   };
@@ -59,7 +59,7 @@ const SignUp = () => {
         return false;
       }
     }
-    if (step === 2 && formData.profilePics.length < 4) {
+    if (step === 2 && formData.profileImage.length < 4) {
       setError("You must upload at least 4 profile pictures.");
       return false;
     }
@@ -93,18 +93,20 @@ const SignUp = () => {
     setError(null);
   
     try {
+      
       const data = new FormData();
+
+      // Append images
+      formData.profileImage.forEach((file) => {
+        data.append("profileImage", file); 
+      });
+
+      // Append other fields
       Object.entries(formData).forEach(([key, value]) => {
-        if (key === "profilePics") {
-          value.forEach((file) => data.append("profilePics", file)); // Ensure each file is appended separately
-        } else if (Array.isArray(value)) {
-          data.append(key, JSON.stringify(value)); // Convert arrays to JSON string
-        } else {
-          data.append(key, value);
+        if (key !== "profileImage") {
+          data.append(key, Array.isArray(value) ? JSON.stringify(value) : value);
         }
       });
-  
-      console.log("Submitting Data:", data); // Debugging
   
       const response = await axios.post(
         "http://localhost:5050/Authentication/signUp",
@@ -125,6 +127,7 @@ const SignUp = () => {
   
     setLoading(false);
   };
+  
   
 
   return (
@@ -158,7 +161,7 @@ const SignUp = () => {
         {/* Step 3: Personal Details */}
         {step === 3 && (
           <>
-            <input type="date" name="age" value={formData.age} onChange={handleChange} className="w-full p-3 border rounded-lg" required />
+            <input type="date" name="age" value={formData.age} onChange={handleChange}max={new Date().toISOString().split("T")[0]}  className="w-full p-3 border rounded-lg" required />
             <input type="text" name="location" placeholder="Location" value={formData.location} onChange={handleChange} className="w-full p-3 border rounded-lg" required />
             <input type="text" name="qualification" placeholder="Education" value={formData.qualification} onChange={handleChange} className="w-full p-3 border rounded-lg" required />
             <input type="text" name="occupation" placeholder="Occupation" value={formData.occupation} onChange={handleChange} className="w-full p-3 border rounded-lg" required />
@@ -169,13 +172,13 @@ const SignUp = () => {
          {step === 4 && (
           <>
           <textarea
-  name="aboutMe"
-  placeholder="Tell us about yourself"
-  value={formData.aboutMe}
-  onChange={handleChange}
-  className="w-full p-3 border rounded-lg"
-  required
-/>
+            name="aboutMe"
+            placeholder="Tell us about yourself"
+            value={formData.aboutMe}
+            onChange={handleChange}
+            className="w-full h-[50px] p-3 border rounded-lg"
+            required
+          />
 
             <select
               name="relationshipPreference"
@@ -204,6 +207,7 @@ const SignUp = () => {
             </select>
 
             <select
+            multiple
               name="interests"
               value={formData.interests}
               onChange={handleMultiSelectChange}
@@ -217,6 +221,7 @@ const SignUp = () => {
             </select>
 
             <select
+            multiple
               name="hobbies"
               value={formData.hobbies}
               onChange={handleMultiSelectChange}
