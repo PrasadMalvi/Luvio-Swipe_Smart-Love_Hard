@@ -116,7 +116,6 @@ const SignUp = () => {
   
       if (response.data.success) {
         localStorage.setItem("token", response.data.token);
-        alert("Registration Successful!");
         navigate("/homePage");
       } else {
         setError(response.data.message || "Something went wrong.");

@@ -335,9 +335,37 @@ const verifyOtpController = async (req, res) => {
   }
 };
 
+// Get User Details Controller
+const getUserDetails = async (req, res) => {
+  try {
+    const userId = req.user.id; // Extract user ID from authenticated request
+
+    // Fetch user details from database
+    const user = await UserData.findById(userId).select("-password"); // Exclude password field
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error in fetching user details",
+    });
+  }
+};
+
 module.exports = {
   signUpController,
   signInController,
   sendOtpController,
   verifyOtpController,
+  getUserDetails,
 };

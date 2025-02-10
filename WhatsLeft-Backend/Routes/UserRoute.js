@@ -4,7 +4,10 @@ const {
   signInController,
   sendOtpController,
   verifyOtpController,
+  getUserDetails,
 } = require("../Controller/UserController");
+
+const authenticate = require("../Middleware/authMiddleware.js");
 
 const router = express.Router();
 const multer = require("multer");
@@ -21,10 +24,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Corrected: Ensure `profileImage` is used correctly
 router.post("/signUp", upload.array("profileImage", 5), signUpController);
 router.post("/signIn", signInController);
 router.post("/send-otp", sendOtpController);
 router.post("/verifyOtp", verifyOtpController);
+router.get("/getUser", authenticate, getUserDetails);
 
 module.exports = router;

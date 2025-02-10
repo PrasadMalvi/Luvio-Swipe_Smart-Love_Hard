@@ -9,28 +9,35 @@ const SignIn = () => {
     mobileNumber: "",
     otp: "",
   });
+
   const [method, setMethod] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [otpSent, setOtpSent] = useState(false);
   const navigate = useNavigate();
 
-  // 🔹 Check if the user is already logged in (Token Persistence)
+  // ✅ Fix: Prevent navigation infinite loop
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (token) {
-      navigate("/homePage");
+      navigate("/homePage", { replace: true }); // Prevents reloading issues
     }
-  }, [navigate]);
+  }, []);
 
+  // ✅ Handle input changes properly
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
+  // ✅ Sign in with Email
   const handleEmailSignIn = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
     try {
       const res = await axios.post("http://localhost:5050/Authentication/signIn", {
         email: formData.email,
@@ -39,32 +46,39 @@ const SignIn = () => {
 
       localStorage.setItem("authToken", res.data.token); // Save Token
       alert("Sign-in successful! Redirecting...");
-      navigate("/homePage");
+      navigate("/homePage", { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
+  // ✅ Send OTP for Mobile Login
   const handleSendOtp = async () => {
     setLoading(true);
     setError(null);
+
     try {
       await axios.post("http://localhost:5050/Authentication/send-otp", {
         mobileNumber: formData.mobileNumber,
       });
+
       setOtpSent(true);
       alert("OTP sent successfully!");
     } catch (err) {
       setError(err.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
+  // ✅ Verify OTP and Sign In
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
     try {
       const res = await axios.post("http://localhost:5050/Authentication/verifyOtp", {
         mobileNumber: formData.mobileNumber,
@@ -72,12 +86,12 @@ const SignIn = () => {
       });
 
       localStorage.setItem("authToken", res.data.token); // Save Token
-      alert("Sign-in successful! Redirecting...");
-      navigate("/homePage");
+      navigate("/homePage", { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || "Invalid OTP");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -90,15 +104,14 @@ const SignIn = () => {
         }}
       ></div>
 
-      {/* Overlay to Darken Background */}
+      {/* Overlay */}
       <div className="absolute inset-0 bg-black opacity-40"></div>
 
-      {/* Content Wrapper */}
+      {/* Form Wrapper */}
       <div className="relative flex flex-col items-center justify-center h-full bg-black bg-opacity-60">
         
         {/* Form Card */}
-        <div className="bg-white bg-opacity-90 p-10 rounded-lg shadow-lg w-[500px] ">
-          {/* Logo */}
+        <div className="bg-white bg-opacity-90 p-10 rounded-lg shadow-lg w-[500px]">
           <img
             src={require("../Components/Assets/logo5.png")}
             className="h-[150px] w-auto mb-6 ml-20"
@@ -110,6 +123,7 @@ const SignIn = () => {
 
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
+          {/* Selection Buttons */}
           {!method && (
             <div className="flex flex-col items-center space-y-4 w-[300px] ml-12 mb-10">
               <button
@@ -136,6 +150,7 @@ const SignIn = () => {
             </div>
           )}
 
+          {/* Email Login Form */}
           {method === "email" && (
             <form onSubmit={handleEmailSignIn} className="flex flex-col space-y-4 w-[350px] ml-12 mb-10">
               <input
@@ -166,6 +181,7 @@ const SignIn = () => {
             </form>
           )}
 
+          {/* Mobile OTP Login */}
           {method === "mobile" && (
             <div className="flex flex-col space-y-4">
               <input
