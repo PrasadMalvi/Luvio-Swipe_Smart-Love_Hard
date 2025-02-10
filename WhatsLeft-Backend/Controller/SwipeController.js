@@ -5,9 +5,11 @@ const getUsers = async (req, res) => {
     const loggedInUserId = req.user.id; // Get logged-in user from JWT
     console.log("Fetching users for:", loggedInUserId);
 
-    const users = await UserData.find({ _id: { $ne: loggedInUserId } }) // Exclude logged-in user
-      .select("name age location interests profilePictures")
-      .limit(10); // Limit to 10 users
+    const users = await UserData.find({ _id: { $ne: loggedInUserId } })
+      .select(
+        "name age location interests profilePictures occupation relationshipPreference lookingFor hobbies aboutMe"
+      )
+      .limit(10);
 
     console.log("Fetched Users:", users);
 
