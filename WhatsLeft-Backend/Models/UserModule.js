@@ -17,6 +17,7 @@ const UserData = new mongoose.Schema(
       type: String,
       required: true,
     },
+    lookingFor: { type: String, required: true },
     location: { type: String, required: true },
     occupation: { type: String, required: true },
     interests: { type: [String], required: true }, // Array for multiple selections

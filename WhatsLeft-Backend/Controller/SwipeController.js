@@ -2,16 +2,13 @@ const UserData = require("../Models/UserModule");
 
 const getUsers = async (req, res) => {
   try {
-    const loggedInUserId = req.user.id; // Get logged-in user from JWT
-    console.log("Fetching users for:", loggedInUserId);
+    const loggedInUserId = req.user.id;
 
     const users = await UserData.find({ _id: { $ne: loggedInUserId } })
       .select(
         "name age location interests profilePictures occupation relationshipPreference lookingFor hobbies aboutMe"
       )
       .limit(10);
-
-    console.log("Fetched Users:", users);
 
     return res.status(200).json({
       success: true,
