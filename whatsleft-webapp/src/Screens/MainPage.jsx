@@ -49,17 +49,17 @@ const MainPage = () => {
           alt="Logo"
         />
 
-        <div className="w-full flex items-center justify-between px-6 py-3 bg-black rounded-lg mb-4">
-          <Link to="/homePage/profile" className="flex items-center cursor-pointer" onClick={() => setActivePage("profile")}>
+        <div className="w-full flex items-center justify-between px-6 py-3 bg-[#b25776] rounded-lg mb-4">
+          <Link to="/homePage/profile" className="flex items-center cursor-pointer hover:bg-gray-900 rounded-full pl-0 w-[200px]" onClick={() => setActivePage("profile")}>
             <img
               src={user.profilePic}
-              className="w-15 h-20 rounded-xl mr-3 bg-inherit border-2 border-[#b25776]"
+              className="w-20 h-20 rounded-full mr-3 bg-inherit border-2 "
               alt="User"
             />
             <span className="text-lg">{user.name || "User"}</span>
           </Link>
-          <Link to="/homePage/settings" className="cursor-pointer" onClick={() => setActivePage("settings")}>
-            <FaCog size={24} />
+          <Link to="/homePage/settings" className="cursor-pointer hover:bg-gray-900 w-[50px] h-[50px] rounded-full" onClick={() => setActivePage("settings")}>
+            <FaCog size={24} className=" align-middle mt-3 ml-3"/>
           </Link>
         </div>
 
