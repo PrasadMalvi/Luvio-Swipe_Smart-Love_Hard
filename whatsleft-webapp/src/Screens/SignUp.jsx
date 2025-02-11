@@ -137,7 +137,7 @@ const SignUp = () => {
           {["Basic Info", "Profile Pictures", "Personal Details", "Preferences & Interests"][step - 1]}
         </h2>
 
-        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+        {error && <p className="text-[#b25776] text-sm text-center">{error}</p>}
 
         {/* Step 1: Basic Info */}
         {step === 1 && (

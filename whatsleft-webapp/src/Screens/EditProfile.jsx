@@ -1,47 +1,58 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaPlus, FaTrash, FaArrowUp, FaArrowDown } from "react-icons/fa";
+import { FaPlus, FaTrash, FaChevronRight } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 const EditProfile = () => {
   const [user, setUser] = useState({
     profilePictures: [],
     aboutMe: "",
-    occupation: "",
     lookingFor: "",
     relationshipPreference: "",
-    hobbies: [],
-    interests: [],
     height: "",
-    zodiacSign: "",
-    lifestyle: {
+    location: "",
+    qualification: "",
+    basics: {
+      occupation: "",
+      zodiacSign: "",
+      sexualOrientation: "",
       familyPlans: "",
+    },
+    lifestyle: {
       pets: "",
       drinking: "",
       smoking: "",
       workout: "",
       sleepingHabits: "",
     },
-    sexualOrientation: "",
-    gender: "",
+    hobbies: [],
+    interests: [],
   });
 
+  const [modalOpen, setModalOpen] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("");
+
   const options = {
-    lookingFor: ["Long-term", "Short-term", "Friends", "Figuring Out"],
-    relationshipPreference: ["Monogamy", "Polygamy", "Open to Explore", "Ethical Non-Monogamy"],
-    height: Array.from({ length: 35 }, (_, i) => `${4 + Math.floor(i / 12)}'${i % 12}"`),
-    zodiacSign: ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"],
-    sexualOrientation: ["Straight", "Gay", "Bisexual", "Asexual", "Pansexual", "Queer"],
-    gender: ["Male", "Female", "Non-binary", "Transgender", "Other"],
-    lifestyle: {
-      familyPlans: ["Want Kids", "Don't Want Kids", "Not Sure"],
-      pets: ["Dog", "Cat", "Other", "None"],
-      drinking: ["Never", "Occasionally", "Regularly"],
-      smoking: ["Never", "Occasionally", "Regularly"],
-      workout: ["Never", "Occasionally", "Regularly"],
-      sleepingHabits: ["Early Bird", "Night Owl", "Flexible"],
+    LookingFor: ["Long-term", "Short-term", "Friends", "Figuring Out"],
+    RelationshipPreference: ["Monogamy", "Polygamy", "Open to Explore", "Ethical Non-Monogamy"],
+    Height: Array.from({ length: 35 }, (_, i) => `${4 + Math.floor(i / 12)}'${i % 12}"`),
+    Location: "",
+    Occupation: "",
+    qalification: "",
+    Basics: {
+      ZodiacSign: ["Aries", "Taurus", "Gemini", "Cancer", "Leo"],
+      SexualOrientation: ["Straight", "Gay", "Bisexual", "Asexual", "Pansexual"],
+      FamilyPlans: ["Want Kids", "Don't Want Kids", "Not Sure"],
     },
-    hobbies: ["Reading", "Traveling", "Cooking", "Music", "Gaming", "Sports", "Dancing"],
-    interests: ["Technology", "Fashion", "Fitness", "Movies", "Photography", "Art", "Food"],
+    Lifestyle: {
+      Pets: ["Dog", "Cat", "Other", "None"],
+      Drinking: ["Never", "Occasionally", "Regularly"],
+      Smoking: ["Never", "Occasionally", "Regularly"],
+      Workout: ["Never", "Occasionally", "Regularly"],
+      SleepingHabits: ["Early Bird", "Night Owl", "Flexible"],
+    },
+    Hobbies: ["Reading", "Traveling", "Cooking", "Gaming"],
+    Interests: ["Technology", "Fitness", "Movies", "Photography"],
   };
 
   useEffect(() => {
@@ -52,10 +63,13 @@ const EditProfile = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.data.success && res.data.user) {
-          setUser((prevUser) => ({
-            ...prevUser,
-            ...res.data.user,
-          }));
+            setUser((prevUser) => ({
+                ...prevUser,
+                ...res.data.user,
+                age: res.data.user.age ? new Date().getFullYear() - new Date(res.data.user.age).getFullYear() : "N/A",
+                profilePictures: res.data.user.profilePictures?.map((pic) => `http://localhost:5050/${pic.replace(/\\/g, "/")}`) || []
+              }));
+              
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -64,79 +78,122 @@ const EditProfile = () => {
     fetchUser();
   }, []);
 
-  const toggleSelection = (field, value) => {
+  const toggleModal = (category) => {
+    setSelectedCategory(category);
+    setModalOpen(modalOpen === category ? null : category);
+  };
+
+  const handleSelection = (field, value) => {
     setUser((prev) => ({
       ...prev,
-      [field]: prev[field] === value ? "" : value,
+      [field]: value,
     }));
+    setModalOpen(null);
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-4">Edit Profile</h2>
-
+    <div className="bg-gray-900 h-[775px] w-[1200px] -mt-6 -ml-6 pt-5">
+    <div className="max-w-2xl mx-auto p-6 bg-black rounded-lg shadow-md w-[400px] h-[740px] pt-10 text-white overflow-y-auto scrollbar-hide">
+      
+    <div className="flex text-center bg-gradient-to-t from-black via-black/50 to-transparent text-white text-lg font-bold py-3 z-30 -mt-12">
+          <h1 className="text-3xl text-start  -ml-4 ">{user?.name}</h1><h3 className="text-2xl text-start ml-2 mt-1">{user?.age}</h3>
+        </div>
       {/* Profile Pictures */}
-      <div className="grid grid-cols-5 gap-2 mb-4">
-        {user.profilePictures.map((pic, index) => (
-          <div key={index} className="relative w-24 h-24">
-            <img src={pic} alt="Profile" className="w-full h-full object-cover rounded-lg" />
-            <button className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full">
-              <FaTrash size={12} />
-            </button>
-          </div>
-        ))}
-        {user.profilePictures.length < 10 && (
-          <button className="w-24 h-24 bg-gray-300 flex items-center justify-center rounded-lg">
-            <FaPlus size={24} />
-          </button>
-        )}
-      </div>
-
+      <div className="grid gap-x-10 gap-y-2 grid-cols-3 mb-6">
+          {[...Array(9)].map((_, index) => (
+            <div key={index} className="relative w-[123px] h-[200px] rounded-xl  bg-white -ml-4">
+              {user.profilePictures[index] ? (
+                <>
+                  <img
+                    src={user.profilePictures[index]}
+                    alt="Profile"
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                  <button className="absolute top-0 right-0 bg-[#b25776] text-white p-1 rounded-full">
+                    <FaTrash size={12} />
+                  </button>
+                </>
+              ) : (
+                <button className="w-full h-full bg-gray-300 rounded-xl  flex items-center justify-center">
+                  <FaPlus size={24} />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
       {/* About Me */}
       <label className="block text-sm font-medium mb-1">About Me</label>
-      <textarea className="w-full border p-2 rounded-md mb-4" value={user.aboutMe} />
-
-      {/* Selection Fields */}
-      {["lookingFor", "relationshipPreference", "height", "zodiacSign", "sexualOrientation", "gender"].map((field) => (
-        <div key={field} className="mb-4">
-          <label className="block text-sm font-medium mb-1">{field.replace(/([A-Z])/g, " $1").trim()}</label>
-          <div className="flex flex-wrap gap-2">
-            {options[field].map((option) => (
-              <button
-                key={option}
-                className={`px-3 py-1 rounded-full ${user[field] === option ? "bg-[#b25776] text-white" : "bg-gray-200"}`}
-                onClick={() => toggleSelection(field, option)}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
+      <textarea name="aboutMe" className="w-full border-solid border-2 border-[#b25776] p-2 rounded-md mb-4 bg-gray-900" value={user.aboutMe} />
+      <div>
+            <input type="text" placeholder="Location" className="w-full border-solid border-2 border-[#b25776] p-2 rounded-md mb-4 bg-gray-900" />
+            <input type="text" placeholder="Qalification" className="w-full border-solid border-2 border-[#b25776] p-2 rounded-md mb-4 bg-gray-900"/>
+        </div>
+      {/* Selectable Fields with Modal */}
+      {["LookingFor", "RelationshipPreference", "Height"].map((field) => (
+        <div key={field} className="flex justify-between items-center p-3 border-b cursor-pointer hover:text-[#b25776]" onClick={() => toggleModal(field)}>
+          <span>{field.replace(/([A-Z])/g, " $1").trim()}</span>
+          <FaChevronRight className="hover:text-[#b25776]"/>
         </div>
       ))}
-
-      {/* Lifestyle Preferences */}
-      <div className="mt-6">
-        <h3 className="text-lg font-semibold">Lifestyle</h3>
-        {Object.keys(user.lifestyle).map((key) => (
-          <div key={key} className="mb-4">
-            <label className="block text-sm font-medium mb-1">{key.replace(/([A-Z])/g, " $1").trim()}</label>
-            <div className="flex flex-wrap gap-2">
-              {options.lifestyle[key].map((option) => (
-                <button
-                  key={option}
-                  className={`px-3 py-1 rounded-full ${user.lifestyle[key] === option ? "bg-[#b25776] text-white" : "bg-gray-200"}`}
-                  onClick={() => setUser((prev) => ({
-                    ...prev,
-                    lifestyle: { ...prev.lifestyle, [key]: prev.lifestyle[key] === option ? "" : option },
-                  }))}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
+       
+      {/* Basics Section */}
+      <div className="flex justify-between items-center p-3 border-b cursor-pointer hover:text-[#b25776] " onClick={() => toggleModal("Basics")}>
+        <span>Basic</span>
+        <FaChevronRight/>
       </div>
+
+      {/* Lifestyle Section */}
+      <div className="flex justify-between items-center p-3 border-b cursor-pointer hover:text-[#b25776]" onClick={() => toggleModal("Lifestyle")}>
+        <span>Lifestyle</span>
+        <FaChevronRight />
+      </div>
+
+      {/* Hobbies & Interests */}
+      <div className="flex justify-between items-center p-3 border-b cursor-pointer hover:text-[#b25776]" onClick={() => toggleModal("HobbiesAndInterests")}>
+        <span>Hobbies & Interests</span>
+        <FaChevronRight/>
+      </div>
+
+      {/* Bottom Sheet Modal */}
+      <div className="h-[200] w-[400px]">
+      {modalOpen && (
+       <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed bottom-0 left-1/2 transform -translate-x-1/2 bg-gray-800 p-4 rounded-lg shadow-lg w-[400px] max-h-[300px] -ml-14 mb-4 overflow-auto scrollbar-hide">
+            <div className="flex justify-between items-center mb-3">
+              <button className="text-white fixed text-4xl ml-[340px]" onClick={() => setModalOpen(null)}>×</button>
+            </div>
+          <div className="grid grid-cols-1 gap-2 ">
+            {(selectedCategory === "Basics"
+              ? Object.entries(options.Basics)
+              : selectedCategory === "Lifestyle"
+              ? Object.entries(options.Lifestyle)
+              : selectedCategory === "HobbiesAndInterests"
+              ? [
+                  ["Hobbies", options.Hobbies],
+                  ["Interests", options.Interests],
+                ]
+              : [[selectedCategory, options[selectedCategory]]]
+            ).map(([key, values]) => (
+              <div key={key} className=" grid grid-rows-1 mb-2 w-[100px]">
+                <h4 className="font-semibold">{key}</h4>
+                {values.map((option) => (
+                  <div
+                    key={option}
+                    className={`bg-gray-900 p-2 rounded-lg text-center cursor-pointer mb-1.5  ${
+                      user[key] === option ? "bg-[#b25776] text-white" : ""
+                    }`}
+                    onClick={() => handleSelection(key, option)}
+                  >
+                    {option}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+          
+        </motion.div>
+      )}
+      </div>
+    </div>
     </div>
   );
 };
