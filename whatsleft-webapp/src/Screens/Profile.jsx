@@ -10,8 +10,10 @@ import {
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
 
 const Profile = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -156,10 +158,11 @@ const Profile = () => {
 
       {/* Edit Profile Button */}
       <div className="fixed bottom-5">
-        <button className="bg-blue-500 p-4 rounded-full shadow-lg flex items-center space-x-2 text-white text-lg">
+        <Link to="/homePage/profile/editProfile" className="bg-[#b25776] p-4 rounded-full shadow-lg flex items-center space-x-2 text-white text-lg">
           <FaEdit /> <span>Edit Profile</span>
-        </button>
+        </Link>
       </div>
+
     </div>
   );
 };

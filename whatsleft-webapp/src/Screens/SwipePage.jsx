@@ -122,7 +122,7 @@ const SwipePage = () => {
 
           <div className="flex items-center space-x-3 text-white opacity-85">
             <h1 className="text-3xl">{users[index]?.name}</h1>
-            <h3 className="text-2xl">
+            <h3 className="text-2xl mt-1.5">
               {users[index]?.age ? new Date().getFullYear() - new Date(users[index].age).getFullYear() : "N/A"}
             </h3>
           </div>
