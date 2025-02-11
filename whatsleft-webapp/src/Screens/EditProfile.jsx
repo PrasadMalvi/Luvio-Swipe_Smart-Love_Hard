@@ -12,8 +12,8 @@ const EditProfile = () => {
     height: "",
     location: "",
     qualification: "",
+    occupation: "",
     basics: {
-      occupation: "",
       zodiacSign: "",
       sexualOrientation: "",
       familyPlans: "",
@@ -64,12 +64,34 @@ const EditProfile = () => {
         });
         if (res.data.success && res.data.user) {
             setUser((prevUser) => ({
-                ...prevUser,
-                ...res.data.user,
-                age: res.data.user.age ? new Date().getFullYear() - new Date(res.data.user.age).getFullYear() : "N/A",
-                profilePictures: res.data.user.profilePictures?.map((pic) => `http://localhost:5050/${pic.replace(/\\/g, "/")}`) || []
-              }));
-              
+              ...prevUser,
+              ...res.data.user,
+              age: res.data.user.age?.length ? res.data.user.age?.length : [],
+              profilePictures:
+                res.data.user.profilePictures?.map((pic) =>
+                  `http://localhost:5050/${pic}`.replace(/\\/g, "/")
+                ) || [],
+              hobbies: res.data.user.hobbies?.length ? res.data.user.hobbies : [],
+              interests: res.data.user.interests?.length
+                ? res.data.user.interests
+                : [],
+              occupation: res.data.user.occupation || "",
+              location: res.data.user.location || "",
+              lookingFor: res.data.user.lookingFor || "",
+              relationshipPreference: res.data.user.relationshipPreference || "",
+              height: res.data.user.height || "",
+              zodiacSign: res.data.user.zodiacSign || "",
+              lifestyle: {
+                familyPlans: res.data.user.lifestyle?.familyPlans || "",
+                pets: res.data.user.lifestyle?.pets || "",
+                drinking: res.data.user.lifestyle?.drinking || "",
+                smoking: res.data.user.lifestyle?.smoking || "",
+                workout: res.data.user.lifestyle?.workout || "",
+                sleepingHabits: res.data.user.lifestyle?.sleepingHabits || "",
+              },
+              sexualOrientation: res.data.user.sexualOrientation || "",
+              gender: res.data.user.gender || "",
+          }));
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -90,6 +112,33 @@ const EditProfile = () => {
     }));
     setModalOpen(null);
   };
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    setUser((prev) => ({
+      ...prev,
+      profilePictures: [...prev.profilePictures, ...files.map((file) => URL.createObjectURL(file))],
+    }));
+  };
+
+  const handleRemoveImage = (index) => {
+    setUser((prev) => {
+      const updatedPictures = [...prev.profilePictures];
+      updatedPictures[index] = null; // Remove image by setting it to null
+  
+      return { ...prev, profilePictures: updatedPictures };
+    });
+  };
+  
+  const handleReorderImages = (startIndex, endIndex) => {
+    setUser((prev) => {
+      const updatedImages = [...prev.profilePictures];
+      const [movedImage] = updatedImages.splice(startIndex, 1); // Remove dragged item
+      updatedImages.splice(endIndex, 0, movedImage); // Insert at new position
+  
+      return { ...prev, profilePictures: updatedImages };
+    });
+  };
+    
 
   return (
     <div className="bg-gray-900 h-[775px] w-[1200px] -mt-6 -ml-6 pt-5">
@@ -109,13 +158,15 @@ const EditProfile = () => {
                     alt="Profile"
                     className="w-full h-full object-cover rounded-lg"
                   />
-                  <button className="absolute top-0 right-0 bg-[#b25776] text-white p-1 rounded-full">
+                  <button className="absolute top-0 right-0 bg-gray-700 text-white p-1 rounded-full">
                     <FaTrash size={12} />
                   </button>
                 </>
               ) : (
-                <button className="w-full h-full bg-gray-300 rounded-xl  flex items-center justify-center">
-                  <FaPlus size={24} />
+                <button className="w-full h-full bg-gray-900 rounded-lg  flex items-center justify-center">
+                    <input type="file" multiple onChange={handleImageUpload} className="hidden" id="fileInput" />
+                    <label htmlFor="fileInput" className="cursor-pointer bg-gray-700 p-2 rounded-3xl"><FaPlus size={12} /></label>
+                  
                 </button>
               )}
             </div>
@@ -123,11 +174,32 @@ const EditProfile = () => {
         </div>
       {/* About Me */}
       <label className="block text-sm font-medium mb-1">About Me</label>
-      <textarea name="aboutMe" className="w-full border-solid border-2 border-[#b25776] p-2 rounded-md mb-4 bg-gray-900" value={user.aboutMe} />
-      <div>
-            <input type="text" placeholder="Location" className="w-full border-solid border-2 border-[#b25776] p-2 rounded-md mb-4 bg-gray-900" />
-            <input type="text" placeholder="Qalification" className="w-full border-solid border-2 border-[#b25776] p-2 rounded-md mb-4 bg-gray-900"/>
-        </div>
+      <textarea
+          className="w-full border-2 border-[#b25776] p-2 rounded-md bg-gray-900"
+          value={user.aboutMe}
+          onChange={(e) => setUser({ ...user, aboutMe: e.target.value })}
+        />
+      <input
+        type="text"
+        placeholder="Location"
+        className="w-full border-solid border-2 border-[#b25776] p-2 rounded-md mb-4 bg-gray-900"
+        value={user.location}
+        onChange={(e) => setUser({ ...user, location: e.target.value })}
+        />
+        <input
+        type="text"
+        placeholder="Qualification"
+        className="w-full border-solid border-2 border-[#b25776] p-2 rounded-md mb-4 bg-gray-900"
+        value={user.qualification}
+        onChange={(e) => setUser({ ...user, qualification: e.target.value })}
+        />
+        <input
+        type="text"
+        placeholder="Occuption"
+        className="w-full border-solid border-2 border-[#b25776] p-2 rounded-md mb-4 bg-gray-900"
+        value={user.occupation}
+        onChange={(e) => setUser({ ...user, occupation: e.target.value })}
+        />
       {/* Selectable Fields with Modal */}
       {["LookingFor", "RelationshipPreference", "Height"].map((field) => (
         <div key={field} className="flex justify-between items-center p-3 border-b cursor-pointer hover:text-[#b25776]" onClick={() => toggleModal(field)}>
@@ -162,32 +234,21 @@ const EditProfile = () => {
               <button className="text-white fixed text-4xl ml-[340px]" onClick={() => setModalOpen(null)}>×</button>
             </div>
           <div className="grid grid-cols-1 gap-2 ">
-            {(selectedCategory === "Basics"
-              ? Object.entries(options.Basics)
-              : selectedCategory === "Lifestyle"
-              ? Object.entries(options.Lifestyle)
-              : selectedCategory === "HobbiesAndInterests"
-              ? [
-                  ["Hobbies", options.Hobbies],
-                  ["Interests", options.Interests],
-                ]
-              : [[selectedCategory, options[selectedCategory]]]
-            ).map(([key, values]) => (
-              <div key={key} className=" grid grid-rows-1 mb-2 w-[100px]">
-                <h4 className="font-semibold">{key}</h4>
-                {values.map((option) => (
-                  <div
-                    key={option}
-                    className={`bg-gray-900 p-2 rounded-lg text-center cursor-pointer mb-1.5  ${
-                      user[key] === option ? "bg-[#b25776] text-white" : ""
-                    }`}
-                    onClick={() => handleSelection(key, option)}
-                  >
-                    {option}
+          {(selectedCategory === "Basics" ? Object.entries(options.Basics) :
+              selectedCategory === "Lifestyle" ? Object.entries(options.Lifestyle) :
+              selectedCategory === "HobbiesAndInterests" ? [["Hobbies", options.Hobbies], ["Interests", options.Interests]] :
+              [[selectedCategory, options[selectedCategory]]]).map(([key, values]) => (
+                <div key={key}>
+                  <h4 className="font-semibold mb-2">{key}</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {values.map((option) => (
+                      <div key={option} className={`p-2 rounded-lg cursor-pointer bg-gray-700 ${user[key] === option ? "bg-pink-600" : ""}`} onClick={() => handleSelection(key, option)}>
+                        {option}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            ))}
+                </div>
+              ))}
           </div>
           
         </motion.div>
