@@ -17,7 +17,7 @@ const UserData = new mongoose.Schema(
     }, // At least 4 images
     relationshipPreference: { type: String, required: true },
     lookingFor: { type: String, required: true },
-    height: { type: String, required: false }, // Added height field
+    height: { type: String, required: false },
     location: { type: String, required: true },
     qualification: { type: String, required: true },
     occupation: { type: String, required: true },
