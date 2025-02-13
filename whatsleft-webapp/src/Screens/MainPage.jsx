@@ -50,25 +50,25 @@ const MainPage = () => {
           alt="Logo"
         />
 
-        <div className="w-full flex items-center justify-between px-6 py-3 bg-[#b25776] rounded-lg mb-4">
-          <Link to="/homePage/profile" className="flex items-center cursor-pointer hover:bg-gray-900 rounded-full pl-0 w-[200px]" onClick={() => setActivePage("profile")}>
-            <img src={user.profilePic} className="w-20 h-20 rounded-full mr-3 bg-inherit" alt="User" />
-            <span className="text-lg">{user.name || "User"}</span>
+        <div className="w-full flex items-center justify-between px-6 py-3 bg-transparent rounded-lg mb-4">
+          <Link to="/homePage/profile" className="flex items-center cursor-pointer hover:bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900 rounded-full pl-0 w-[250px]" onClick={() => setActivePage("profile")}>
+            <img src={user.profilePic} className="w-14 h-14 rounded-full mr-3 bg-inherit" alt="User" />
+            <span className="text-lg font-bold">{user.name || "User"}</span>
           </Link>
-          <Link to="/homePage/settings" className="cursor-pointer hover:bg-gray-900 w-[50px] h-[50px] rounded-full" onClick={() => setActivePage("settings")}>
+          <Link to="/homePage/settings" className="cursor-pointer hover:bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900 w-[50px] h-[50px] rounded-full" onClick={() => setActivePage("settings")}>
             <FaCog size={24} className="align-middle mt-3 ml-3" />
           </Link>
         </div>
 
         <Link
           to="/homePage"
-          className={`w-full flex items-center px-6 py-4 text-lg text-[#b25776] hover:bg-[#b25776] hover:text-white  ${activePage === "swipe" ? "bg-transparent" : ""}`}
+          className={`w-full flex items-center px-6 py-4 text-lg text-[#b25776] hover:bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900 rounded-full hover:text-white  ${activePage === "swipe" ? "bg-transparent" : ""}`}
           onClick={() => setActivePage("swipe")}
         >
-          <FaFire className="mr-3 text-[#b25776] hover:bg-white" /> Swipe
+          <FaFire className="mr-3 " /> Swipe
         </Link>
 
-        <div className="w-full px-6 py-4 text-lg hover:bg-[#b25776]">
+        <div className="w-full px-6 py-4 text-lg hover:bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900 rounded-full">
           <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsMessagesOpen(!isMessagesOpen)}>
             <div className="flex items-center">
               <FaComments className="mr-3" />

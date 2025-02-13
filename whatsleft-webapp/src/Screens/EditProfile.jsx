@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaPlus, FaTrash, FaChevronRight } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const EditProfile = () => {
+    const navigate = useNavigate();
   const [user, setUser] = useState({
     profilePictures: [],
     aboutMe: "",
@@ -31,6 +33,7 @@ const EditProfile = () => {
 
   const [modalOpen, setModalOpen] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [originalUser, setOriginalUser] = useState(null);
 
   const options = {
     LookingFor: ["Long-term", "Short-term", "Friends", "Figuring Out"],
@@ -57,24 +60,23 @@ const EditProfile = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      try {
-        const token = localStorage.getItem("authToken");
-        const res = await axios.get("http://localhost:5050/Authentication/getUser", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.data.success && res.data.user) {
-            setUser((prevUser) => ({
-              ...prevUser,
+        try {
+          const token = localStorage.getItem("authToken");
+          const res = await axios.get("http://localhost:5050/Authentication/getUser", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+      
+          if (res.data.success && res.data.user) {
+            console.log("Fetched user:", res.data.user); // Debugging
+      
+            const fetchedUser = {
               ...res.data.user,
-              age: res.data.user.age?.length ? res.data.user.age?.length : [],
-              profilePictures:
-                res.data.user.profilePictures?.map((pic) =>
-                  `http://localhost:5050/${pic}`.replace(/\\/g, "/")
-                ) || [],
-              hobbies: res.data.user.hobbies?.length ? res.data.user.hobbies : [],
-              interests: res.data.user.interests?.length
-                ? res.data.user.interests
-                : [],
+              profilePictures: res.data.user.profilePictures?.map((pic) =>
+                pic.startsWith("http") ? pic : `http://localhost:5050/${pic}`.replace(/\\/g, "/")
+              ) || [],
+              aboutMe: res.data.user.aboutMe || "",
+              hobbies: res.data.user.hobbies || [],
+              interests: res.data.user.interests || [],
               occupation: res.data.user.occupation || "",
               location: res.data.user.location || "",
               lookingFor: res.data.user.lookingFor || "",
@@ -91,14 +93,42 @@ const EditProfile = () => {
               },
               sexualOrientation: res.data.user.sexualOrientation || "",
               gender: res.data.user.gender || "",
-          }));
+              qualification: res.data.user.qualification || "",
+            };
+      
+            setUser(fetchedUser);
+            setOriginalUser(fetchedUser); // Store original data
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
         }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
+      };
+      
     fetchUser();
   }, []);
+
+  const isEdited = () => {
+    return JSON.stringify(user) !== JSON.stringify(originalUser);
+  };
+
+  const saveProfile = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const res = await axios.put(
+        "http://localhost:5050/Authentication/updateProfile",
+        user,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log("Profile updated successfully", res.data);
+      navigate("/homepage/profile")
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile. Please try again.");
+    }
+  };
+  
 
   const toggleModal = (category) => {
     setSelectedCategory(category);
@@ -110,7 +140,7 @@ const EditProfile = () => {
       ...prev,
       [field]: value,
     }));
-    setModalOpen(null);
+   
   };
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -128,29 +158,18 @@ const EditProfile = () => {
       return { ...prev, profilePictures: updatedPictures };
     });
   };
-  
-  const handleReorderImages = (startIndex, endIndex) => {
-    setUser((prev) => {
-      const updatedImages = [...prev.profilePictures];
-      const [movedImage] = updatedImages.splice(startIndex, 1); // Remove dragged item
-      updatedImages.splice(endIndex, 0, movedImage); // Insert at new position
-  
-      return { ...prev, profilePictures: updatedImages };
-    });
-  };
-    
 
   return (
-    <div className="bg-gray-900 h-[775px] w-[1200px] -mt-6 -ml-6 pt-5">
-    <div className="max-w-2xl mx-auto p-6 bg-black rounded-lg shadow-md w-[400px] h-[740px] pt-10 text-white overflow-y-auto scrollbar-hide">
+    <div className="flex flex-col items-center bg-gray-900 h-screen w-[1110px] overflow-hidden relative -ml-6 -mt-6 pt-5">
+    <div className="max-w-2xl mx-auto mb-20 p-6 bg-black rounded-xl shadow-md w-[400px] h-[740px] pt-10 text-white overflow-y-auto scrollbar-hide">
       
-    <div className="flex text-center bg-gradient-to-t from-black via-black/50 to-transparent text-white text-lg font-bold py-3 z-30 -mt-12">
-          <h1 className="text-3xl text-start  -ml-4 ">{user?.name}</h1><h3 className="text-2xl text-start ml-2 mt-1">{user?.age}</h3>
+    <div className="flex text-center bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-black text-white w-[400px] -ml-6 rounded-t-xl -mt-10 mb-5 h-[50px]">
+          <h1 className="text-3xl text-start pl-3 pt-2 ">{user?.name}</h1><h3 className="text-2xl text-start ml-2 mt-1 pt-2">{user?.age ? new Date().getFullYear() - new Date(user.age).getFullYear() : "N/A"}</h3>
         </div>
       {/* Profile Pictures */}
       <div className="grid gap-x-10 gap-y-2 grid-cols-3 mb-6">
           {[...Array(9)].map((_, index) => (
-            <div key={index} className="relative w-[123px] h-[200px] rounded-xl  bg-white -ml-4">
+            <div key={index} className="relative w-[123px] h-[180px] rounded-xl  bg-white -ml-4">
               {user.profilePictures[index] ? (
                 <>
                   <img
@@ -158,14 +177,15 @@ const EditProfile = () => {
                     alt="Profile"
                     className="w-full h-full object-cover rounded-lg"
                   />
-                  <button className="absolute top-0 right-0 bg-gray-700 text-white p-1 rounded-full">
+                  <button onClick={() => handleRemoveImage(index)} className="absolute top-0 right-0 bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-black text-white p-1 rounded-full">
                     <FaTrash size={12} />
-                  </button>
+                </button>
+
                 </>
               ) : (
                 <button className="w-full h-full bg-gray-900 rounded-lg  flex items-center justify-center">
                     <input type="file" multiple onChange={handleImageUpload} className="hidden" id="fileInput" />
-                    <label htmlFor="fileInput" className="cursor-pointer bg-gray-700 p-2 rounded-3xl"><FaPlus size={12} /></label>
+                    <label htmlFor="fileInput" className="cursor-pointer bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-black p-2 rounded-3xl"><FaPlus size={12} /></label>
                   
                 </button>
               )}
@@ -229,7 +249,7 @@ const EditProfile = () => {
       {/* Bottom Sheet Modal */}
       <div className="h-[200] w-[400px]">
       {modalOpen && (
-       <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed bottom-0 left-1/2 transform -translate-x-1/2 bg-gray-800 p-4 rounded-lg shadow-lg w-[400px] max-h-[300px] -ml-14 mb-4 overflow-auto scrollbar-hide">
+       <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed bottom-16 left-1/2 transform -translate-x-1/2 bg-gray-800 p-4 rounded-lg shadow-lg w-[400px] max-h-[500px] -ml-8 mb-4 overflow-auto scrollbar-hide">
             <div className="flex justify-between items-center mb-3">
               <button className="text-white fixed text-4xl ml-[340px]" onClick={() => setModalOpen(null)}>×</button>
             </div>
@@ -242,7 +262,7 @@ const EditProfile = () => {
                   <h4 className="font-semibold mb-2">{key}</h4>
                   <div className="flex flex-wrap gap-2">
                     {values.map((option) => (
-                      <div key={option} className={`p-2 rounded-lg cursor-pointer bg-gray-700 ${user[key] === option ? "bg-pink-600" : ""}`} onClick={() => handleSelection(key, option)}>
+                      <div key={option} className={`p-2 rounded-lg cursor-pointer bg-gray-700 ${user[key] === option ? "bg-gradient-to-r from-[#b25776] via-pink-60/50 to-black" : ""}`} onClick={() => handleSelection(key, option)}>
                         {option}
                       </div>
                     ))}
@@ -254,7 +274,20 @@ const EditProfile = () => {
         </motion.div>
       )}
       </div>
+      <div className="fixed bottom-5">
+          <button
+            type="submit"
+            onClick={saveProfile}
+            disabled={!isEdited()} // Disable when no edits
+            className={`p-4 w-[150px] ml-[100px] pl-[55px] rounded-full shadow-lg flex items-center space-x-2 text-white text-xl ${
+              isEdited() ? "bg-[#b25776]" : "bg-gray-600 cursor-not-allowed"
+            }`}
+          >
+            Save
+          </button>
+        </div>
     </div>
+        
     </div>
   );
 };

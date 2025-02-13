@@ -5,6 +5,7 @@ const {
   sendOtpController,
   verifyOtpController,
   getUserDetails,
+  updateProfileController,
 } = require("../Controller/UserController");
 
 const authenticate = require("../Middleware/authMiddleware.js");
@@ -29,5 +30,11 @@ router.post("/signIn", signInController);
 router.post("/send-otp", sendOtpController);
 router.post("/verifyOtp", verifyOtpController);
 router.get("/getUser", authenticate, getUserDetails);
+router.put(
+  "/updateProfile",
+  upload.array("profileImage", 9),
+  authenticate,
+  updateProfileController
+);
 
 module.exports = router;

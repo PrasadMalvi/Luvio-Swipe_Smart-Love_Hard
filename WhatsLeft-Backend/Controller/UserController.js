@@ -362,10 +362,47 @@ const getUserDetails = async (req, res) => {
   }
 };
 
+// UserController.js
+const updateProfileController = async (req, res) => {
+  try {
+    const userId = req.user.id; // Extract user ID from JWT
+    const updates = req.body;
+
+    // Handling profile picture updates
+    if (req.files && req.files.length > 0) {
+      updates.profilePictures = req.files.map((file) => file.path);
+    }
+
+    const updatedUser = await UserData.findByIdAndUpdate(
+      userId,
+      { $set: updates },
+      { new: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully!",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Profile Update Error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Error updating profile" });
+  }
+};
+
 module.exports = {
   signUpController,
   signInController,
   sendOtpController,
   verifyOtpController,
   getUserDetails,
+  updateProfileController,
 };

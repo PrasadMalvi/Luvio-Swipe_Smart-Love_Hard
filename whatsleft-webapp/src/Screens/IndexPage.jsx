@@ -22,11 +22,11 @@ const IndexPage = () => {
         />
 
         {/* Overlay Content */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center bg-black bg-opacity-50">
-          <h1 className="text-5xl font-bold mb-4">Start Swiping Right!</h1>
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center bg-black bg-opacity-60">
+          <h1 className="text-5xl font-bold mb-4 mt-40">Start Swiping Right!</h1>
           <button
             onClick={() => setShowSignUp(true)}
-            className="px-6 py-3 bg-[#b25776] text-white text-xl rounded-full hover:bg-[#e887a9] transition duration-300"
+            className="px-6 py-3 bg-gradient-to-r from-[#c64d76] via-[#c64d76]/80 to-black text-white text-xl rounded-full hover:bg-[#e887a9] transition duration-300"
           >
             Sign Up Now
           </button>

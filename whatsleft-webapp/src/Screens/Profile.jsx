@@ -10,10 +10,9 @@ import {
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
-  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -28,20 +27,7 @@ const Profile = () => {
         });
 
         if (res.data.success && res.data.user) {
-          const profilePictures =
-            res.data.user.profilePictures?.length > 0
-              ? res.data.user.profilePictures.map((pic) => `http://localhost:5050/${pic}`.replace(/\\/g, "/"))
-              : ["https://via.placeholder.com/200"]; // Default image if no profile pictures
-
-          setUser({
-            name: res.data.user.name,
-            age: res.data.user.age ? new Date().getFullYear() - new Date(res.data.user.age).getFullYear() : "N/A",
-            occupation: res.data.user.occupation || "Not specified",
-            location: res.data.user.location || "Not specified",
-            hobbies: res.data.user.hobbies || [],
-            interests: res.data.user.interests || [],
-            profilePictures, // Store multiple pictures
-          });
+          setUser(res.data.user);
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -53,9 +39,8 @@ const Profile = () => {
     fetchUser();
   }, []);
 
-  // Handle Next and Previous Image in Carousel
   const handleNextImage = () => {
-    if (currentImageIndex < user.profilePictures.length - 1) {
+    if (user?.profilePictures?.length > 1 && currentImageIndex < user.profilePictures.length - 1) {
       setCurrentImageIndex(currentImageIndex + 1);
     }
   };
@@ -65,28 +50,29 @@ const Profile = () => {
       setCurrentImageIndex(currentImageIndex - 1);
     }
   };
-
+  const fixImageUrl = (url) => {
+    if (!url) return "/default-avatar.jpg";
+    return url.replace(/(http:\/\/localhost:5050\/)+/, "http://localhost:5050/");
+  };
+  
   if (loading) return <h2 className="text-xl font-bold text-center mt-10">Loading...</h2>;
 
   return (
-    <div className="flex flex-col items-center bg-gray-900 h-screen w-full overflow-hidden relative -ml-6 -mt-6">
+    <div className="flex flex-col items-center bg-gray-900 h-screen w-full overflow-hidden relative">
       <div className="w-[450px] bg-transparent mt-5 shadow-xl rounded-lg flex flex-col h-[85vh] overflow-y-auto scrollbar-hide">
-        
-        {/* Profile Picture Carousel */}
         <div
           className="relative h-[95%]"
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
           <img
-            src={user.profilePictures[currentImageIndex]}
-            alt="Profile"
-            className="w-full h-[660px] object-cover rounded-lg"
-            onError={(e) => (e.target.src = "/default-avatar.jpg")}
-          />
+  src={fixImageUrl(user?.profilePictures?.[currentImageIndex])}
+  alt="Profile"
+  className="w-full h-[560px] object-cover rounded-lg"
+/>
 
-          {/* Image Navigation Buttons */}
-          {user.profilePictures.length > 1 && (
+
+          {user?.profilePictures?.length > 1 && (
             <>
               {currentImageIndex > 0 && (
                 <button
@@ -96,7 +82,6 @@ const Profile = () => {
                   <FaChevronLeft className="text-white text-2xl" />
                 </button>
               )}
-
               {hovered && currentImageIndex < user.profilePictures.length - 1 && (
                 <button
                   onClick={handleNextImage}
@@ -109,60 +94,54 @@ const Profile = () => {
           )}
         </div>
 
-        {/* Profile Info */}
-        <div className="text-center bg-gradient-to-t from-black via-black/50 to-transparent text-white text-lg font-bold py-3 z-30 -mt-12">
-          <h1 className="text-3xl text-start  pl-5 ">{user?.name}</h1>
-          <h3 className="text-2xl text-start pl-5">{user?.age} years old</h3>
-        </div>
+        <div className="p-4 bg-black space-y-4 text-white">
+          <h1 className="text-3xl">{user?.name}</h1>
+          <h3 className="text-2xl">{user?.age ? new Date().getFullYear() - new Date(user.age).getFullYear() : "N/A"} years old</h3>
+          <div className="bg-gray-800 p-3 rounded-lg">
+          <h3 className="text-lg font-bold capitalize ">About Me</h3>
+          <p>{user?.aboutMe || "No description available."}</p>
+          </div>
 
-        {/* Profile Details */}
-        <div className="p-4 bg-black space-y-4">
-          {[
-            { icon: <FaUser />, title: "About Me", value: "A great person looking for something special." },
-            { icon: <FaBriefcase />, title: "Occupation", value: user?.occupation },
-            { icon: <FaMapMarkerAlt />, title: "Location", value: user?.location },
-            {
-              icon: <FaRunning />,
-              title: "Hobbies",
-              value: user?.hobbies.length ? (
-                <div className="flex flex-wrap gap-2">
-                  {user.hobbies.map((hobby, i) => (
-                    <div key={i} className="bg-[#b25776] text-white text-sm rounded-full px-3 py-1">{hobby}</div>
-                  ))}
+
+          {["occupation", "location", "qualification", "lookingFor", "relationshipPreference", "height", "zodiacSign", "sexualOrientation", "gender"].map(
+            (field, idx) =>
+              user?.[field] && (
+                <div key={idx} className="bg-gray-800 p-3 rounded-lg">
+                  <h3 className="text-lg font-bold capitalize ">{field.replace(/([A-Z])/g, " $1")}</h3>
+                  <p>{user[field]}</p>
                 </div>
-              ) : (
-                "Not specified"
-              ),
-            },
-            {
-              icon: <FaMusic />,
-              title: "Interests",
-              value: user?.interests.length ? (
-                <div className="flex flex-wrap gap-2">
-                  {user.interests.map((interest, i) => (
-                    <div key={i} className="bg-[#b25776] text-white text-sm rounded-full px-3 py-1">{interest}</div>
-                  ))}
-                </div>
-              ) : (
-                "Not specified"
-              ),
-            },
-          ].map((detail, idx) => (
-            <div key={idx} className="p-3 bg-gray-800 rounded-lg text-[#b25776] space-y-1">
-              <div className="flex items-center space-x-3">{detail.icon} <h3 className="text-lg font-bold">{detail.title}</h3></div>
-              <span className="block text-white">{detail.value}</span>
+              )
+          )}
+
+          {user?.hobbies?.length > 0 && (
+            <div className="bg-gray-800 p-3 rounded-lg">
+              <h3 className="text-lg font-bold">Hobbies</h3>
+              <div className="flex flex-wrap gap-2">
+                {user.hobbies.map((hobby, i) => (
+                  <span key={i} className="bg-[#b25776] text-white text-sm rounded-full px-3 py-1">{hobby}</span>
+                ))}
+              </div>
             </div>
-          ))}
+          )}
+
+          {user?.interests?.length > 0 && (
+            <div className="bg-gray-800 p-3 rounded-lg">
+              <h3 className="text-lg font-bold">Interests</h3>
+              <div className="flex flex-wrap gap-2">
+                {user.interests.map((interest, i) => (
+                  <span key={i} className="bg-[#b25776] text-white text-sm rounded-full px-3 py-1">{interest}</span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Edit Profile Button */}
       <div className="fixed bottom-5">
         <Link to="/homePage/profile/editProfile" className="bg-[#b25776] p-4 rounded-full shadow-lg flex items-center space-x-2 text-white text-lg">
           <FaEdit /> <span>Edit Profile</span>
         </Link>
       </div>
-
     </div>
   );
 };

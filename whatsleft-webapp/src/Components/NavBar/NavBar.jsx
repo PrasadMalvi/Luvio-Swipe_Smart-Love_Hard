@@ -7,7 +7,7 @@ const NavBar = () => {
 
   return (
     <nav className="bg-gradient-to-b from-[#4a4747] to-transparent fixed w-full top-0 z-50 h-20">
-      <div className="container mx-auto flex justify-between items-center px-6 py-3 md:py-4 -mt-4">
+      <div className="container mx-auto flex justify-between  items-center px-6 py-3 md:py-4 -mt-4">
         {/* Logo */}
         <NavLink to="/" className="flex items-center">
           <img
@@ -45,7 +45,7 @@ const NavBar = () => {
         <div className="hidden md:block">
           <NavLink
             to="/signIn"
-            className="px-10 py-3 rounded-3xl bg-[#b25776] text-white h-[60px] hover:bg-[#e887a9] transition duration-300 text-xl"
+            className="px-10 py-3 rounded-3xl bg-gradient-to-r from-[#c64d76] via-[#c64d76]/80 to-black  text-white h-[60px] hover:bg-[#e887a9] transition duration-300 text-xl"
           >
             Sign In
           </NavLink>

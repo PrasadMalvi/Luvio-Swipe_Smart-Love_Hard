@@ -45,7 +45,6 @@ const SignIn = () => {
       });
 
       localStorage.setItem("authToken", res.data.token); // Save Token
-      alert("Sign-in successful! Redirecting...");
       navigate("/homePage", { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong");
