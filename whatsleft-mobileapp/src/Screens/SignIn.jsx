@@ -19,32 +19,36 @@ const SignIn = ({ navigation }) => {
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Function to handle Email/Password Login
-  const handleEmailLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please enter email and password.");
-      return;
-    }
+  import AsyncStorage from "@react-native-async-storage/async-storage";
 
-    setLoading(true);
-    try {
-      const response = await axios.post("http://192.168.0.101:5050/Authentication/signIn", {
-        email,
-        password,
-      });
+const handleEmailLogin = async () => {
+  if (!email || !password) {
+    Alert.alert("Error", "Please enter email and password.");
+    return;
+  }
 
-      if (response.data.success) {
-        Alert.alert("Success", "Login successful!");
-        navigation.navigate("MainApp");
-      } else {
-        Alert.alert("Error", response.data.message);
-      }
-    } catch (error) {
-      Alert.alert("Error", "Login failed. Try again later.");
-      console.error(error);
+  setLoading(true);
+  try {
+    const response = await axios.post("http://192.168.0.101:5050/Authentication/signIn", {
+      email,
+      password,
+    });
+
+    if (response.data.success) {
+      const token = response.data.token; // Get JWT Token
+      await AsyncStorage.setItem("authToken", token); // Store token
+      Alert.alert("Success", "Login successful!");
+      navigation.navigate("MainApp");
+    } else {
+      Alert.alert("Error", response.data.message);
     }
-    setLoading(false);
-  };
+  } catch (error) {
+    Alert.alert("Error", "Login failed. Try again later.");
+    console.error(error);
+  }
+  setLoading(false);
+};
+
 
   // Function to Send OTP
   const handleSendOtp = async () => {
