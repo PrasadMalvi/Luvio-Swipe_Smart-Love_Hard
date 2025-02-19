@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import axios from "axios";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 const SignIn = ({ navigation }) => {
   const [loginType, setLoginType] = useState("email"); // "email" or "mobile"
   const [email, setEmail] = useState("");
@@ -18,8 +20,6 @@ const SignIn = ({ navigation }) => {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const handleEmailLogin = async () => {
   if (!email || !password) {
