@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import SignIn from "./src/Screens/SignIn";
 import Signup from "./src/Screens/SignUp";
 import SwipePage from "./src/Screens/SwipePage";
@@ -10,11 +11,10 @@ import ProfilePage from "./src/Screens/ProfilePage";
 import SettingsPage from "./src/Screens/SettingsPage";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 
-// Stack for authentication (SignIn, Signup)
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Bottom Tab Navigator (Fixed Navbar)
+// Bottom Tabs (Main App Navigation)
 function BottomTabs() {
   return (
     <Tab.Navigator
@@ -25,16 +25,11 @@ function BottomTabs() {
           else if (route.name === "Chats") iconName = "comment-alt";
           else if (route.name === "Profile") iconName = "user";
           else if (route.name === "Settings") iconName = "cog";
-
           return <FontAwesome5 name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: "#b25776",
         tabBarInactiveTintColor: "gray",
-        tabBarStyle: {
-          backgroundColor: "black",
-          paddingTop: 5,
-          height: 60,
-        },
+        tabBarStyle: { backgroundColor: "black", paddingTop: 5, height: 60 },
       })}
     >
       <Tab.Screen name="Swipe" component={SwipePage} />
@@ -45,11 +40,24 @@ function BottomTabs() {
   );
 }
 
-// Main App Navigator
+// Main App Component
 export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(null);
+
+  // Check login state on app launch
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const token = await AsyncStorage.getItem("authToken");
+      setIsLoggedIn(token ? true : false);
+    };
+    checkLoginStatus();
+  }, []);
+
+  if (isLoggedIn === null) return null; // Prevent flickering
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="SignIn">
+      <Stack.Navigator initialRouteName={isLoggedIn ? "MainApp" : "SignIn"}>
         <Stack.Screen
           name="SignIn"
           component={SignIn}
