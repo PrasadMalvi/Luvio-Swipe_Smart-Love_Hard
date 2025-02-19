@@ -5,6 +5,7 @@ import {
 import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons"; // For icons
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Signup = ({ navigation }) => {
   const [name, setName] = useState("");
@@ -59,6 +60,8 @@ const Signup = ({ navigation }) => {
       });
 
       if (response.data.success) {
+        const token = response.data.token;
+        await AsyncStorage.setItem("authToken", token);
         Alert.alert("Success", "Registration successful! Please log in.");
         navigation.navigate("MainPage");
       } else {

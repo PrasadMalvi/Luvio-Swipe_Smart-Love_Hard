@@ -91,6 +91,8 @@ const handleEmailLogin = async () => {
       });
 
       if (response.data.success) {
+        const token = response.data.token;
+        await AsyncStorage.setItem("authToken", token);
         Alert.alert("Success", "OTP Verified!");
         navigation.navigate("MainApp"); // Navigate to Home on successful OTP verification
       } else {
