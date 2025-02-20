@@ -53,7 +53,7 @@ export default function App() {
     checkLoginStatus();
   }, []);
 
-  if (isLoggedIn === null) return null; // Prevent flickering
+  if (isLoggedIn === null) return null;
 
   return (
     <NavigationContainer>
