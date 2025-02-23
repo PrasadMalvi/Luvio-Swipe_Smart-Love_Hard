@@ -13,7 +13,7 @@ const Profile = () => {
     const fetchUser = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
-        const res = await axios.get("http://localhost:5050/Authentication/getUser", {
+        const res = await axios.get("http://192.168.0.101:5050/Authentication/getUser", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
