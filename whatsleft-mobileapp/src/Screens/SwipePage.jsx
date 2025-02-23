@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, Image, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useDispatch } from "react-redux";
 import axios from "axios";
-import { likeUser, dislikeUser } from "../store/matchSlice";
+import { likeUser, dislikeUser } from "../Redux/slices/matchSlice";
 import { GestureHandlerRootView, PanGestureHandler, State } from "react-native-gesture-handler";
 import { FontAwesome } from "@expo/vector-icons";
 
