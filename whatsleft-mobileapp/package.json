@@ -27,6 +27,7 @@
     "react-native": "0.76.6",
     "react-native-async-storage": "^0.0.1",
     "react-native-deck-swiper": "^2.0.17",
+    "react-native-dropdown-picker": "^5.4.6",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-multiple-select": "^0.5.12",
     "react-native-paper": "^5.13.1",
