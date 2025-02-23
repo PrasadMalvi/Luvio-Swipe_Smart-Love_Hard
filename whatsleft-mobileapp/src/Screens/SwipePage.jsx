@@ -5,6 +5,7 @@ import axios from "axios";
 import { likeUser, dislikeUser } from "../Redux/slices/matchSlice";
 import { GestureHandlerRootView, PanGestureHandler, State } from "react-native-gesture-handler";
 import { FontAwesome } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SwipePage = () => {
   const [users, setUsers] = useState([]);
@@ -18,7 +19,7 @@ const SwipePage = () => {
       try {
         setLoading(true);
         const token = await AsyncStorage.getItem("authToken");
-        const response = await axios.get("http://localhost:5050/Swipe/getUsers", {
+        const response = await axios.get("http://192.168.0.101:5050/Swipe/getUsers", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (response.data.success) {

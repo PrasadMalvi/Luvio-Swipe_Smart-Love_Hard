@@ -4,7 +4,7 @@ import userReducer from "./userSlice";
 import messagesReducer from "./messagesSlice";
 import chatReducer from "./chatSlice";
 
-const store = configureStore({
+export const store = configureStore({
   reducer: {
     auth: authReducer, // Handles authentication (login/logout)
     users: userReducer, // Stores registered users
@@ -12,5 +12,3 @@ const store = configureStore({
     chat: chatReducer, // Handles active chat state
   },
 });
-
-export default store;

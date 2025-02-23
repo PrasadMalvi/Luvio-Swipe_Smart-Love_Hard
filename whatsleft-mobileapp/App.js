@@ -3,6 +3,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Provider } from "react-redux";
+import { store } from "./src/Redux/slices/store";
 import SignIn from "./src/Screens/SignIn";
 import Signup from "./src/Screens/SignUp";
 import SwipePage from "./src/Screens/SwipePage";
@@ -56,24 +58,28 @@ export default function App() {
   if (isLoggedIn === null) return null;
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName={isLoggedIn ? "MainApp" : "SignIn"}>
-        <Stack.Screen
-          name="SignIn"
-          component={SignIn}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Signup"
-          component={Signup}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="MainApp"
-          component={BottomTabs}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      {" "}
+      {/* ✅ Wrap with Provider */}
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName={isLoggedIn ? "MainApp" : "SignIn"}>
+          <Stack.Screen
+            name="SignIn"
+            component={SignIn}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Signup"
+            component={Signup}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="MainApp"
+            component={BottomTabs}
+            options={{ headerShown: false }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </Provider>
   );
 }
