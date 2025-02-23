@@ -1,27 +1,43 @@
 import React, { useState } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity, Image, Alert, ScrollView, ActivityIndicator,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Alert,
+  ActivityIndicator,
+  ScrollView,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import * as ImagePicker from 'expo-image-picker';
-import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
-import { Formik } from 'formik';
-import * as Yup from "yup";
 import axios from "axios";
-import { StyleSheet } from "react-native";
-import DateTimePicker from '@react-native-community/datetimepicker';
+import * as ImagePicker from "expo-image-picker";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import DropDownPicker from "react-native-dropdown-picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Formik } from "formik";
+import * as Yup from "yup";
 
-const Signup = () => {
-  const navigation = useNavigation();
+const Signup = ({ navigation }) => {
   const [step, setStep] = useState(1);
+  const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [profilePictures, setProfilePictures] = useState([]);
-  const [date, setDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  
+  const SignupSchema = Yup.object().shape({
+    name: Yup.string().required("Full Name is required"),
+    email: Yup.string().email("Invalid email").required("Email is required"),
+    password: Yup.string().min(8, "Password must be at least 8 characters").required("Password is required"),
+    mobileNumber: Yup.string()
+      .matches(/^\d{10}$/, "Enter a valid 10-digit mobile number")
+      .required("Mobile Number is required"),
+    age: Yup.date().required("Age is required"),
+    qualification: Yup.string().required("Qualification is required"),
+    occupation: Yup.string().required("Occupation is required"),
+    relationshipPreference: Yup.string().required("Select a relationship preference"),
+    lookingFor: Yup.string().required("Select what you're looking for"),
+    interests: Yup.array().min(1, "Select at least one interest"),
+    hobbies: Yup.array().min(1, "Select at least one hobby"),
+  });
 
-  // Pick Image
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -29,71 +45,23 @@ const Signup = () => {
       aspect: [1, 1],
       quality: 0.7,
     });
-
-    if (!result.canceled && profilePictures.length < 10) {
-      setProfilePictures([...profilePictures, result.assets[0].uri]);
-    } else {
-      Alert.alert("Limit Reached", "You can upload a maximum of 10 images.");
+    if (!result.canceled) {
+      setProfileImage(result.assets[0].uri);
     }
   };
 
-  // Remove Image
-  const removeImage = (index) => {
-    setProfilePictures(profilePictures.filter((_, i) => i !== index));
-  };
-
-  // Function to calculate age
-  const calculateAge = (dob) => {
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-
-    return age;
-  };
-
-  // Validation Schema
-  const validationSchema = Yup.object({
-    name: Yup.string().required("Required"),
-    email: Yup.string().email("Invalid email").required("Required"),
-    password: Yup.string()
-      .min(8, "Must be at least 8 characters")
-      .matches(/[A-Z]/, "Must include an uppercase letter")
-      .matches(/[a-z]/, "Must include a lowercase letter")
-      .matches(/[0-9]/, "Must include a number")
-      .matches(/[!@#$%^&*]/, "Must include a special character")
-      .required("Required"),
-    mobileNumber: Yup.string()
-      .matches(/^\d{10}$/, "Enter a valid 10-digit mobile number")
-      .required("Required"),
-    age: Yup.date()
-      .test("age", "You must be at least 18 years old", (value) => calculateAge(value) >= 18)
-      .required("Required"),
-    location: Yup.string().required("Required"),
-    qualification: Yup.string().required("Required"),
-    occupation: Yup.string().required("Required"),
-    relationshipPreference: Yup.string().required("Required"),
-    lookingFor: Yup.string().required("Required"),
-    interests: Yup.array().min(1, "Select at least one interest"),
-    hobbies: Yup.array().min(1, "Select at least one hobby"),
-  });
-
-  // Submit Form
   const handleRegister = async (values) => {
-    if (profilePictures.length < 4) {
-      Alert.alert("Error", "You must upload at least 4 profile pictures.");
+    if (!profileImage) {
+      Alert.alert("Error", "Please select a profile picture");
       return;
     }
 
     setLoading(true);
+
     try {
       const response = await axios.post("http://192.168.0.101:5050/Authentication/signup", {
         ...values,
-        profilePictures,
+        profileImage,
       });
 
       if (response.data.success) {
@@ -106,78 +74,75 @@ const Signup = () => {
     } catch (error) {
       Alert.alert("Error", "Registration failed. Try again later.");
     }
+
     setLoading(false);
   };
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 20, backgroundColor: "#F8F9FA" }}>
-      <Image source={require("../Components/assets/logo5.png")} style={{ width: 250, height: 150, alignSelf: "center" }} />
-      
+    <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 20, backgroundColor: "#F8F9FA" }}>
       <Formik
         initialValues={{
-          name: "", email: "", password: "", mobileNumber: "",
-          age: "", location: "", qualification: "", occupation: "",
-          relationshipPreference: "", lookingFor: "", interests: [], hobbies: [],
+          name: "",
+          email: "",
+          password: "",
+          mobileNumber: "",
+          age: "",
+          qualification: "",
+          occupation: "",
+          relationshipPreference: "",
+          lookingFor: "",
+          interests: [],
+          hobbies: [],
         }}
-        validationSchema={validationSchema}
-        onSubmit={handleRegister}
+        validationSchema={SignupSchema}
+        onSubmit={(values) => handleRegister(values)}
       >
-        {({ handleChange, handleSubmit, values, errors, setFieldValue }) => (
-          <>
+        {({ handleChange, handleSubmit, values, errors, touched, setFieldValue }) => (
+          <View>
             {step === 1 && (
               <>
-                <TextInput placeholder="Full Name" value={values.name} onChangeText={handleChange("name")} style={styles.input} />
-                <Text style={styles.error}>{errors.name}</Text>
+                <TextInput placeholder="Full Name" value={values.name} onChangeText={handleChange("name")} style={{ borderBottomWidth: 1, marginBottom: 10 }} />
+                {touched.name && errors.name && <Text style={{ color: "red" }}>{errors.name}</Text>}
+                <TextInput placeholder="Email" value={values.email} onChangeText={handleChange("email")} keyboardType="email-address" style={{ borderBottomWidth: 1, marginBottom: 10 }} />
+                {touched.email && errors.email && <Text style={{ color: "red" }}>{errors.email}</Text>}
+                <TouchableOpacity onPress={() => setStep(2)}><Text>Next</Text></TouchableOpacity>
+              </>
+            )}
 
-                <TextInput placeholder="Email" value={values.email} onChangeText={handleChange("email")} keyboardType="email-address" style={styles.input} />
-                <Text style={styles.error}>{errors.email}</Text>
-
-                <TextInput placeholder="Password" value={values.password} onChangeText={handleChange("password")} secureTextEntry style={styles.input} />
-                <Text style={styles.error}>{errors.password}</Text>
-
-                <TextInput placeholder="Mobile Number" value={values.mobileNumber} onChangeText={handleChange("mobileNumber")} keyboardType="numeric" style={styles.input} />
-                <Text style={styles.error}>{errors.mobileNumber}</Text>
+            {step === 2 && (
+              <>
+                <TouchableOpacity onPress={pickImage}>
+                  {profileImage ? <Image source={{ uri: profileImage }} style={{ width: 100, height: 100 }} /> : <Text>Select Profile Picture</Text>}
+                </TouchableOpacity>
+                <TextInput placeholder="Age" value={values.age} onChangeText={handleChange("age")} keyboardType="numeric" style={{ borderBottomWidth: 1, marginBottom: 10 }} />
+                <TouchableOpacity onPress={() => setStep(3)}><Text>Next</Text></TouchableOpacity>
               </>
             )}
 
             {step === 3 && (
               <>
-                <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
-                  <Text>{values.age ? new Date(values.age).toDateString() : "Select Date of Birth"}</Text>
-                </TouchableOpacity>
-                {showDatePicker && (
-                  <DateTimePicker
-                    value={date}
-                    mode="date"
-                    display="spinner"
-                    onChange={(event, selectedDate) => {
-                      setShowDatePicker(false);
-                      if (selectedDate) {
-                        setDate(selectedDate);
-                        setFieldValue("age", selectedDate.toISOString());
-                      }
-                    }}
-                  />
-                )}
-                <Text style={styles.error}>{errors.age}</Text>
+                <DropDownPicker
+                  items={[{ label: "Graduate", value: "graduate" }, { label: "Postgraduate", value: "postgraduate" }]}
+                  placeholder="Select Qualification"
+                  open={false}
+                  value={values.qualification}
+                  setValue={(val) => setFieldValue("qualification", val)}
+                />
+                <TouchableOpacity onPress={() => setStep(4)}><Text>Next</Text></TouchableOpacity>
               </>
             )}
 
-            <TouchableOpacity onPress={step === 4 ? handleSubmit : () => setStep(step + 1)} style={styles.button}>
-              {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{step === 4 ? "Sign Up" : "Next"}</Text>}
-            </TouchableOpacity>
-          </>
+            {step === 4 && (
+              <>
+                <TextInput placeholder="Hobbies" value={values.hobbies} onChangeText={handleChange("hobbies")} style={{ borderBottomWidth: 1, marginBottom: 10 }} />
+                <TouchableOpacity onPress={handleSubmit}><Text>Register</Text></TouchableOpacity>
+              </>
+            )}
+          </View>
         )}
       </Formik>
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  input: { borderWidth: 1, borderColor: "#ccc", padding: 10, marginVertical: 5, borderRadius: 5 },
-  error: { color: "red", fontSize: 12, marginBottom: 5 },
-  button: { backgroundColor: "#b25776", padding: 15, borderRadius: 5, alignItems: "center", marginTop: 10 },
-  buttonText: { color: "#fff", fontSize: 16 },
-});
 
 export default Signup;
