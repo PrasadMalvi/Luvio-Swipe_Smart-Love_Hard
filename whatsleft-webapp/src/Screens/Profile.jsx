@@ -132,7 +132,7 @@ const Profile = () => {
           <img
           src={fixImageUrl(user?.profilePictures?.[currentImageIndex])}
           alt="Profile"
-          className="w-full h-[600px] object-cover rounded-lg -mt-10"
+          className="w-full h-[660px] object-cover rounded-lg -mt-10"
         />
 
 
@@ -159,54 +159,66 @@ const Profile = () => {
             </>
           )}
         </div>
-        <div className="p-4 bg-black space-y-4 text-white -mt-10" >
-          <div className="grid">
-          <h1 className="text-3xl">{user?.name}</h1>
-          <h3 className="text-2xl">
-            {user?.age ? new Date().getFullYear() - new Date(user.age).getFullYear() : "N/A"} years old
-          </h3>
+        <div className="text-center bg-gradient-to-t from-black/100 via-black/65 to-transparent text-white text-lg font-bold py-2 pl-3 -mt-[47px] z-30">
+          <div className="flex items-center space-x-3 text-white opacity-85">
+            <h1 className="text-3xl">{user?.name}</h1>
+            <h3 className="text-2xl mt-1.5">
+              {user?.age ? new Date().getFullYear() - new Date(user.age).getFullYear() : "N/A"}
+            </h3>
           </div>
+          <div className="flex items-center space-x-3 text-white opacity-70 ">
+            <FaBriefcase />
+            <span>{user?.occupation || "Not specified"}</span>
+          </div>
+        </div>
+
+
+        <div className="p-4 bg-black space-y-4 text-white -mt-1" >
+         
 
           {/* About Me */}
-          {user?.aboutMe && (
-            <div className="bg-gray-800 p-3 rounded-lg flex items-start">
-              <h3 className="text-lg font-bold capitalize mr-2">About Me:</h3>
-              <p>{user.aboutMe}</p>
-            </div>
-          )}
+          <div className="bg-gray-800 p-3 rounded-lg flex items-start">
+  <div className="mr-2 mt-1">
+    <FaUser /> {/* Or your "About Me" specific logo */}
+  </div>
+  <div>
+    <h3 className="text-lg font-bold capitalize">About Me</h3>
+    <p className=" -ml-6">{user.aboutMe}</p>
+  </div>
+</div>
 
           {/* Dynamic Fields */}
           {[
-  "occupation",
-  "location",
-  "qualification",
-  "lookingFor",
-  "relationshipPreference",
-  "height",
-  "zodiacSign",
-  "sexualOrientation",
-  "gender",
-  "familyPlans",
-  "pets",
-  "drinking",
-  "smoking",
-  "workout",
-  "sleepingHabits",
-]
-  .filter((field) => user?.[field])
-  .map((field, idx) => (
-    <div key={idx} className="bg-gray-800 p-3 rounded-lg flex items-start">
-      <div className="mr-2 mt-1">{getIcon(field)}</div>
-      <div>
-        <h3 className="text-lg font-bold capitalize ">
-          {field.replace(/([A-Z])/g, " $1")}
-        </h3>
-        <div className="bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900 text-white text-sm rounded-full px-3 py-1 inline-block -ml-6">
-          {user[field]}
-        </div>
-      </div>
-    </div>
-  ))}
+            "occupation",
+            "location",
+            "qualification",
+            "lookingFor",
+            "relationshipPreference",
+            "height",
+            "zodiacSign",
+            "sexualOrientation",
+            "gender",
+            "familyPlans",
+            "pets",
+            "drinking",
+            "smoking",
+            "workout",
+            "sleepingHabits",
+          ]
+            .filter((field) => user?.[field])
+            .map((field, idx) => (
+              <div key={idx} className="bg-gray-800 p-3 rounded-lg flex items-start">
+                <div className="mr-2 mt-1">{getIcon(field)}</div>
+                <div>
+                  <h3 className="text-lg font-bold capitalize ">
+                    {field.replace(/([A-Z])/g, " $1")}
+                  </h3>
+                  <div className="bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900 text-white text-sm rounded-full px-3 py-1 inline-block -ml-6">
+                    {user[field]}
+                  </div>
+                </div>
+              </div>
+            ))}
 
           {/* Hobbies */}
           {user?.hobbies?.length > 0 && (
@@ -214,9 +226,9 @@ const Profile = () => {
               <div className="mr-2">{getIcon("hobbies")}</div>
               <div>
                 <h3 className="text-lg font-bold">Hobbies</h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 -ml-6">
                   {user.hobbies.map((hobby, i) => (
-                    <span key={i} className="bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900 text-white text-sm rounded-full px-3 py-1">
+                    <span key={i} className="bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900 text-white text-sm rounded-full px-3 py-1 ">
                       {hobby}
                     </span>
                   ))}
@@ -231,9 +243,9 @@ const Profile = () => {
               <div className="mr-2">{getIcon("interests")}</div>
               <div>
                 <h3 className="text-lg font-bold">Interests</h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 -ml-6">
                   {user.interests.map((interest, i) => (
-                    <span key={i} className="bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900 text-white text-sm rounded-full px-3 py-1">
+                    <span key={i} className="bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900 text-white text-sm rounded-full px-3 py-1 ">
                       {interest}
                     </span>
                   ))}
