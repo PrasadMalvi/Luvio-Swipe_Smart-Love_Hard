@@ -16,7 +16,6 @@ import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Bottom Tabs (Main App Navigation)
 function BottomTabs() {
   return (
     <Tab.Navigator
@@ -32,12 +31,40 @@ function BottomTabs() {
         tabBarActiveTintColor: "#b25776",
         tabBarInactiveTintColor: "gray",
         tabBarStyle: { backgroundColor: "black", paddingTop: 5, height: 60 },
+
+        // ✅ Customize header design
+        headerStyle: {
+          backgroundColor: "#1a1a1a", // Change header background color
+          height: 80,
+        },
+        headerTintColor: "#b25776", // Change text/icon color
+        headerTitleStyle: {
+          marginBottom: 10,
+          fontSize: 25,
+          fontWeight: "bold",
+        },
       })}
     >
-      <Tab.Screen name="Swipe" component={SwipePage} />
-      <Tab.Screen name="Chats" component={ChatsPage} />
-      <Tab.Screen name="Profile" component={ProfilePage} />
-      <Tab.Screen name="Settings" component={SettingsPage} />
+      <Tab.Screen
+        name="Swipe"
+        component={SwipePage}
+        options={{ title: "WhatsLeft" }} // ✅ Custom header title
+      />
+      <Tab.Screen
+        name="Chats"
+        component={ChatsPage}
+        options={{ title: "Conversations" }} // ✅ Custom header title
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfilePage}
+        options={{ title: "My Profile" }} // ✅ Custom header title
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsPage}
+        options={{ title: "Preferences" }} // ✅ Custom header title
+      />
     </Tab.Navigator>
   );
 }

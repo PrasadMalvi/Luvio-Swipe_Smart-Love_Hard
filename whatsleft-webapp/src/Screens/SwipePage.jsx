@@ -13,6 +13,15 @@ import {
   FaMusic,
   FaArrowLeft,
   FaArrowRight,
+  FaVenusMars,
+  FaPaw,
+  FaWineBottle,
+  FaDumbbell,
+  FaSmoking,
+  FaHome,
+  FaTransgenderAlt,
+  FaRulerVertical,
+  FaStar,
 } from "react-icons/fa";
 import "swiper/css";
 import "tailwind-scrollbar-hide";
@@ -74,7 +83,7 @@ const SwipePage = () => {
   if (loading) return <h2 className="text-xl font-bold text-center mt-10">Loading...</h2>;
 
   return (
-    <div className="flex flex-col items-center bg-gray-900 h-screen w-full overflow-hidden relative -ml-6 -mt-6">
+    <div className="flex flex-col items-center bg-[#111] h-screen w-full overflow-hidden relative -ml-6 -mt-6">
       <div className="w-[450px] bg-transparent mt-5 shadow-xl rounded-lg flex flex-col h-[85vh] overflow-y-auto scrollbar-hide">
         {/* Image Container */}
         <div
@@ -82,6 +91,18 @@ const SwipePage = () => {
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
+          {/* Image Progress Bar */}
+          <div className="absolute top-2 left-4 right-4 flex z-10">
+            {users[index]?.profilePictures?.map((_, idx) => (
+              <div
+                key={idx}
+                className={`h-1 bg-white rounded-full ${
+                  idx === currentImageIndex ? "bg-gradient-to-r from-[#c64d76] via-[#c64d76]/80 to-gray-900" : ""
+                }`}
+                style={{ width: `${100 / users[index]?.profilePictures?.length}%`, marginRight: idx < users[index]?.profilePictures?.length - 1 ? '5px' : '0' }} // Dynamic width
+              ></div>
+            ))}
+          </div>
           {users[index]?.profilePictures?.length > 0 ? (
             <img
               src={`http://localhost:5050/${users[index].profilePictures[currentImageIndex].replace(/\\/g, "/")}`}
@@ -94,23 +115,24 @@ const SwipePage = () => {
               No Images Available
             </div>
           )}
-          {/* Image Navigation Buttons */}
           {users[index]?.profilePictures?.length > 1 && (
             <>
               {currentImageIndex > 0 && (
                 <button
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-800 p-2 rounded-full text-white"
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-transparent"
                   onClick={handlePrevImage}
                 >
-                  <FaArrowLeft />
+                  <div className="h-[700px] w-[200px]"></div>
                 </button>
               )}
               {hovered && currentImageIndex < users[index].profilePictures.length - 1 && (
+                
                 <button
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-800 p-2 rounded-full text-white"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-transparent"
                   onClick={handleNextImage}
                 >
-                  <FaArrowRight />
+                  <div className="h-[700px] w-[200px]"></div>
+                  
                 </button>
               )}
             </>
@@ -126,7 +148,7 @@ const SwipePage = () => {
               {users[index]?.age ? new Date().getFullYear() - new Date(users[index].age).getFullYear() : "N/A"}
             </h3>
           </div>
-          <div className="flex items-center space-x-3 text-white opacity-70">
+          <div className="flex items-center space-x-3 text-white opacity-70 ">
             <FaBriefcase />
             <span>{users[index]?.occupation || "Not specified"}</span>
           </div>
@@ -135,82 +157,82 @@ const SwipePage = () => {
         {/* Scrollable Profile Details */}
         <div className="p-4 bg-black space-y-4">
           {[
-            { icon: <FaUser />, title: "About Me", value: users[index]?.aboutMe || "No description provided." },
+            { icon: <FaUser />, title: "About Me", value: users[index]?.aboutMe },
             {
               icon: <FaHeart />,
               title: "Relationship Preference",
-              value: (
-                <div className="bg-[#b25776] text-white text-sm rounded-full px-3 py-1 inline-block">
-                  {users[index]?.relationshipPreference || "Not specified"}
-                </div>
-              ),
+              value: users[index]?.relationshipPreference,
+              styled: true,
             },
             {
               icon: <FaUsers />,
               title: "Looking For",
-              value: (
-                <div className="bg-[#b25776] text-white text-sm rounded-full px-3 py-1 inline-block">
-                  {users[index]?.lookingFor || "Not specified"}
-                </div>
-              ),
+              value: users[index]?.lookingFor,
+              styled: true,
             },
             {
               icon: <FaRunning />,
               title: "Hobbies",
-              value: users[index]?.hobbies?.length ? (
-                <div className="flex flex-wrap gap-2">
-                  {users[index].hobbies.map((hobby, i) => (
-                    <div key={i} className="bg-[#b25776] text-white text-sm rounded-full px-3 py-1">
-                      {hobby}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                "Not specified"
-              ),
+              value: users[index]?.hobbies,
+              list: true,
             },
             {
               icon: <FaMusic />,
               title: "Interests",
-              value: users[index]?.interests?.length ? (
-                <div className="flex flex-wrap gap-2">
-                  {users[index].interests.map((interest, i) => (
-                    <div key={i} className="bg-[#b25776] text-white text-sm rounded-full px-3 py-1">
-                      {interest}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                "Not specified"
-              ),
+              value: users[index]?.interests,
+              list: true,
             },
             {
               icon: <FaMapMarkerAlt />,
               title: "Location",
-              value: (
-                <div className="bg-[#b25776] text-white text-sm rounded-full px-3 py-1 inline-block">
-                  {users[index]?.location || "Not specified"}
-                </div>
-              ),
+              value: users[index]?.location,
+              styled: true,
             },
-          ].map((detail, idx) => (
-            <div key={idx} className="p-3 bg-gray-800 rounded-lg text-[#b25776] space-y-1">
-              <div className="flex items-center space-x-3">
-                {detail.icon}
-                <h3 className="text-lg font-bold">{detail.title}</h3>
+            { icon: <FaVenusMars />, title: "Gender", value: users[index]?.gender },
+            { icon: <FaStar />, title: "Zodiac Sign", value: users[index]?.zodiacSign },
+            { icon: <FaPaw />, title: "Pets", value: users[index]?.pets },
+            { icon: <FaWineBottle />, title: "Drinking", value: users[index]?.drinking },
+            { icon: <FaDumbbell />, title: "Workout", value: users[index]?.workout },
+            { icon: <FaSmoking />, title: "Smoking", value: users[index]?.smoking },
+            { icon: <FaHome />, title: "Family Plans", value: users[index]?.familyPlans },
+            { icon: <FaTransgenderAlt />, title: "Sexual Orientation", value: users[index]?.sexualOrientation },
+            { icon: <FaRulerVertical />, title: "Height", value: users[index]?.height },
+          ]
+            .filter((detail) => detail.value)
+            .map((detail, idx) => (
+              <div key={idx} className="p-3 bg-gray-800 rounded-lg text-white space-y-1">
+                <div className="flex items-center space-x-3">
+                  {detail.icon}
+                  <h3 className="text-lg font-bold">{detail.title}</h3>
+                </div>
+                <span className="block text-white">
+                  {detail.styled ? (
+                    <div className="bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900 text-white text-sm rounded-full px-3 py-1 inline-block">
+                      {detail.value}
+                    </div>
+                  ) : detail.list ? (
+                    <div className="flex flex-wrap gap-2">
+                      {detail.value.map((item, i) => (
+                        <div key={i} className="bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900 text-white text-sm rounded-full px-3 py-1">
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    detail.value
+                  )}
+                </span>
               </div>
-              <span className="block text-white">{detail.value}</span>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
 
       {/* Fixed Like/Dislike Buttons */}
       <div className="fixed bottom-5 flex space-x-8 z-50">
-        <button onClick={() => handleSwipe("dislike")} className="bg-red-500 p-4 rounded-full shadow-lg">
+        <button onClick={() => handleSwipe("dislike")} className="bg-red-500 hover:bg-gradient-to-r from-red-500 via-[#b25776]/50 to-gray-900 p-4 rounded-full shadow-lg">
           <FaTimes className="text-white text-3xl" />
         </button>
-        <button onClick={() => handleSwipe("like")} className="bg-[#b25776] p-4 rounded-full shadow-lg">
+        <button onClick={() => handleSwipe("like")} className="bg-[#b25776] p-4 rounded-full shadow-lg hover:bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900">
           <FaHeart className="text-white text-3xl" />
         </button>
       </div>

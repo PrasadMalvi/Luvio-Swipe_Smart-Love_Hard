@@ -38,7 +38,7 @@ const SettingsScreen = ({ navigation }) => {
     try {
       const token = await AsyncStorage.getItem("authToken");
       await axios.put(
-        "http://localhost:5050/Authentication/updateSettings",
+        "http://192.168.0.101:5050/Authentication/updateSettings",
         { notifications: updatedNotifications },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -53,7 +53,7 @@ const SettingsScreen = ({ navigation }) => {
     try {
       const token = await AsyncStorage.getItem("authToken");
       await axios.put(
-        "http://localhost:5050/Authentication/changePassword",
+        "http://192.168.0.101:5050/Authentication/changePassword",
         { newPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -74,7 +74,7 @@ const SettingsScreen = ({ navigation }) => {
         onPress: async () => {
           try {
             const token = await AsyncStorage.getItem("authToken");
-            await axios.delete("http://localhost:5050/Authentication/deleteAccount", {
+            await axios.delete("http://192.168.0.101:5050/Authentication/deleteAccount", {
               headers: { Authorization: `Bearer ${token}` },
             });
             await AsyncStorage.removeItem("authToken");
@@ -90,7 +90,7 @@ const SettingsScreen = ({ navigation }) => {
 
   const logout = async () => {
     await AsyncStorage.removeItem("authToken");
-    navigation.replace("Login");
+    navigation.replace("SignIn");
   };
 
   return (

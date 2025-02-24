@@ -32,6 +32,7 @@ const UserData = new mongoose.Schema(
     smoking: { type: String, required: false },
     workout: { type: String, required: false },
     sleepingHabits: { type: String, required: false },
+    gender: { type: String, required: false },
   },
   { timestamps: true }
 );

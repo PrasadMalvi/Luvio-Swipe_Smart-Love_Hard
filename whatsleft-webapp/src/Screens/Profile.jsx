@@ -7,8 +7,15 @@ import {
   FaRunning,
   FaMusic,
   FaEdit,
-  FaChevronLeft,
-  FaChevronRight,
+  FaTransgenderAlt,
+  FaVenusMars,
+  FaRulerVertical,
+  FaStar,
+  FaPaw,
+  FaWineBottle,
+  FaDumbbell,
+  FaSmoking,
+  FaHome,
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
@@ -51,86 +58,186 @@ const Profile = () => {
     }
   };
   const fixImageUrl = (url) => {
-    if (!url) return "/default-avatar.jpg";
-    return url.replace(/(http:\/\/localhost:5050\/)+/, "http://localhost:5050/");
+    if (!url) return "/default-avatar.jpg"; 
+    if (!url.startsWith("http")) {
+      return `http://localhost:5050/${url}`; // Ensure correct absolute URL
+    }
+    return url;
   };
   
+  
+  const getIcon = (field) => {
+    switch (field) {
+      case "occupation":
+        return <FaBriefcase />;
+      case "location":
+        return <FaMapMarkerAlt />;
+      case "qualification":
+        return <FaUser />;
+      case "lookingFor":
+        return <FaStar />;
+      case "relationshipPreference":
+        return <FaVenusMars />;
+      case "height":
+        return <FaRulerVertical />;
+      case "zodiacSign":
+        return <FaStar />;
+      case "sexualOrientation":
+        return <FaTransgenderAlt />;
+      case "gender":
+        return <FaVenusMars />;
+      case "familyPlans":
+        return <FaHome />;
+      case "pets":
+        return <FaPaw />;
+      case "drinking":
+        return <FaWineBottle />;
+      case "smoking":
+        return <FaSmoking />;
+      case "workout":
+        return <FaDumbbell />;
+      case "sleepingHabits":
+        return <FaHome />;
+      case "hobbies":
+        return <FaRunning />;
+      case "interests":
+        return <FaMusic />;
+      default:
+        return null;
+    }
+  };
+
   if (loading) return <h2 className="text-xl font-bold text-center mt-10">Loading...</h2>;
 
   return (
-    <div className="flex flex-col items-center bg-gray-900 h-screen w-full overflow-hidden relative">
-      <div className="w-[450px] bg-transparent mt-5 shadow-xl rounded-lg flex flex-col h-[85vh] overflow-y-auto scrollbar-hide">
-        <div
-          className="relative h-[95%]"
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-        >
-          <img
-  src={fixImageUrl(user?.profilePictures?.[currentImageIndex])}
-  alt="Profile"
-  className="w-full h-[560px] object-cover rounded-lg"
-/>
+    <div className="flex flex-col items-center bg-gray-900 h-screen w-screen/3 overflow-hidden relative -ml-6 -mt-7 -mr-6">
+      <div className="w-[500px] bg-transparent mt-5 shadow-xl rounded-lg flex flex-col h-[85vh] overflow-y-auto scrollbar-hide">
+      <div
+          className="relative h-[95%]"
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+        >
+          <div className="absolute top-2 left-4 right-4 flex z-10">
+            {user?.profilePictures?.map((_, idx) => (
+              <div
+                key={idx}
+                className={`h-1 bg-white rounded-full ${
+                  idx === currentImageIndex ? "bg-gradient-to-r from-[#c64d76] via-[#c64d76]/80 to-gray-900" : ""
+                }`}
+                style={{ width: `${100 / user?.profilePictures?.length}%`, marginRight: idx < user?.profilePictures?.length - 1 ? '5px' : '0' }} // Dynamic width
+              ></div>
+            ))}
+          </div>
+
+          <img
+          src={fixImageUrl(user?.profilePictures?.[currentImageIndex])}
+          alt="Profile"
+          className="w-full h-[600px] object-cover rounded-lg -mt-10"
+        />
 
 
-          {user?.profilePictures?.length > 1 && (
-            <>
-              {currentImageIndex > 0 && (
-                <button
-                  onClick={handlePrevImage}
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 p-2 bg-black/50 rounded-full"
-                >
-                  <FaChevronLeft className="text-white text-2xl" />
-                </button>
-              )}
-              {hovered && currentImageIndex < user.profilePictures.length - 1 && (
-                <button
-                  onClick={handleNextImage}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-black/50 rounded-full"
-                >
-                  <FaChevronRight className="text-white text-2xl" />
-                </button>
-              )}
-            </>
-          )}
-        </div>
-
-        <div className="p-4 bg-black space-y-4 text-white">
+          {user?.profilePictures?.length > 1 && (
+            <>
+              {currentImageIndex > 0 && (
+                <button
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-transparent"
+                  onClick={handlePrevImage}
+                >
+                  <div className="h-[700px] w-[200px]"></div>
+                </button>
+              )}
+              {hovered && currentImageIndex < user.profilePictures.length - 1 && (
+                
+                <button
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-transparent"
+                  onClick={handleNextImage}
+                >
+                  <div className="h-[700px] w-[200px]"></div>
+                  
+                </button>
+              )}
+            </>
+          )}
+        </div>
+        <div className="p-4 bg-black space-y-4 text-white -mt-10" >
+          <div className="grid">
           <h1 className="text-3xl">{user?.name}</h1>
-          <h3 className="text-2xl">{user?.age ? new Date().getFullYear() - new Date(user.age).getFullYear() : "N/A"} years old</h3>
-          <div className="bg-gray-800 p-3 rounded-lg">
-          <h3 className="text-lg font-bold capitalize ">About Me</h3>
-          <p>{user?.aboutMe || "No description available."}</p>
+          <h3 className="text-2xl">
+            {user?.age ? new Date().getFullYear() - new Date(user.age).getFullYear() : "N/A"} years old
+          </h3>
           </div>
 
-
-          {["occupation", "location", "qualification", "lookingFor", "relationshipPreference", "height", "zodiacSign", "sexualOrientation", "gender"].map(
-            (field, idx) =>
-              user?.[field] && (
-                <div key={idx} className="bg-gray-800 p-3 rounded-lg">
-                  <h3 className="text-lg font-bold capitalize ">{field.replace(/([A-Z])/g, " $1")}</h3>
-                  <p>{user[field]}</p>
-                </div>
-              )
+          {/* About Me */}
+          {user?.aboutMe && (
+            <div className="bg-gray-800 p-3 rounded-lg flex items-start">
+              <h3 className="text-lg font-bold capitalize mr-2">About Me:</h3>
+              <p>{user.aboutMe}</p>
+            </div>
           )}
 
+          {/* Dynamic Fields */}
+          {[
+  "occupation",
+  "location",
+  "qualification",
+  "lookingFor",
+  "relationshipPreference",
+  "height",
+  "zodiacSign",
+  "sexualOrientation",
+  "gender",
+  "familyPlans",
+  "pets",
+  "drinking",
+  "smoking",
+  "workout",
+  "sleepingHabits",
+]
+  .filter((field) => user?.[field])
+  .map((field, idx) => (
+    <div key={idx} className="bg-gray-800 p-3 rounded-lg flex items-start">
+      <div className="mr-2 mt-1">{getIcon(field)}</div>
+      <div>
+        <h3 className="text-lg font-bold capitalize ">
+          {field.replace(/([A-Z])/g, " $1")}
+        </h3>
+        <div className="bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900 text-white text-sm rounded-full px-3 py-1 inline-block -ml-6">
+          {user[field]}
+        </div>
+      </div>
+    </div>
+  ))}
+
+          {/* Hobbies */}
           {user?.hobbies?.length > 0 && (
-            <div className="bg-gray-800 p-3 rounded-lg">
-              <h3 className="text-lg font-bold">Hobbies</h3>
-              <div className="flex flex-wrap gap-2">
-                {user.hobbies.map((hobby, i) => (
-                  <span key={i} className="bg-[#b25776] text-white text-sm rounded-full px-3 py-1">{hobby}</span>
-                ))}
+            <div className="bg-gray-800 p-3 rounded-lg flex items-start">
+              <div className="mr-2">{getIcon("hobbies")}</div>
+              <div>
+                <h3 className="text-lg font-bold">Hobbies</h3>
+                <div className="flex flex-wrap gap-2">
+                  {user.hobbies.map((hobby, i) => (
+                    <span key={i} className="bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900 text-white text-sm rounded-full px-3 py-1">
+                      {hobby}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
+          {/* Interests */}
           {user?.interests?.length > 0 && (
-            <div className="bg-gray-800 p-3 rounded-lg">
-              <h3 className="text-lg font-bold">Interests</h3>
-              <div className="flex flex-wrap gap-2">
-                {user.interests.map((interest, i) => (
-                  <span key={i} className="bg-[#b25776] text-white text-sm rounded-full px-3 py-1">{interest}</span>
-                ))}
+            <div className="bg-gray-800 p-3 rounded-lg flex items-start">
+              <div className="mr-2">{getIcon("interests")}</div>
+              <div>
+                <h3 className="text-lg font-bold">Interests</h3>
+                <div className="flex flex-wrap gap-2">
+                  {user.interests.map((interest, i) => (
+                    <span key={i} className="bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900 text-white text-sm rounded-full px-3 py-1">
+                      {interest}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -138,7 +245,10 @@ const Profile = () => {
       </div>
 
       <div className="fixed bottom-5">
-        <Link to="/homePage/profile/editProfile" className="bg-[#b25776] p-4 rounded-full shadow-lg flex items-center space-x-2 text-white text-lg">
+        <Link
+          to="/homePage/profile/editProfile"
+          className="bg-[#b25776] hover:bg-gradient-to-r from-[#c64d76] via-[#b25776]/50 to-gray-900 p-4 rounded-full shadow-lg flex items-center space-x-2 text-white text-lg"
+        >
           <FaEdit /> <span>Edit Profile</span>
         </Link>
       </div>

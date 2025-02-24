@@ -10,7 +10,6 @@ export default function ChatsPage() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Chats</Text>
       <FlatList
         data={chats}
         keyExtractor={(item) => item.id}
