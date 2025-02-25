@@ -162,7 +162,7 @@ const SignUp = () => {
       );
   
       if (response.data.success) {
-        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("authToken", response.data.token);
         navigate("/homePage");
       } else {
         setError(response.data.message || "Something went wrong.");

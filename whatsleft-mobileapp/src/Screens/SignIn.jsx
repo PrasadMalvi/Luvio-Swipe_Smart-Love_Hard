@@ -37,7 +37,6 @@ const handleEmailLogin = async () => {
     if (response.data.success) {
       const token = response.data.token; // Get JWT Token
       await AsyncStorage.setItem("authToken", token); // Store token
-      Alert.alert("Success", "Login successful!");
       navigation.navigate("MainApp");
     } else {
       Alert.alert("Error", response.data.message);

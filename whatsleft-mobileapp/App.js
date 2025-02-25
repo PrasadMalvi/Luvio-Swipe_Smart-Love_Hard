@@ -69,15 +69,14 @@ function BottomTabs() {
   );
 }
 
-// Main App Component
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(null);
 
-  // Check login state on app launch
   useEffect(() => {
     const checkLoginStatus = async () => {
       const token = await AsyncStorage.getItem("authToken");
       setIsLoggedIn(token ? true : false);
+      console.log("setIsLoggedIn updated:", isLoggedIn); //add this line
     };
     checkLoginStatus();
   }, []);
@@ -86,8 +85,6 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      {" "}
-      {/* ✅ Wrap with Provider */}
       <NavigationContainer>
         <Stack.Navigator initialRouteName={isLoggedIn ? "MainApp" : "SignIn"}>
           <Stack.Screen
@@ -95,11 +92,9 @@ export default function App() {
             component={SignIn}
             options={{ headerShown: false }}
           />
-          <Stack.Screen
-            name="Signup"
-            component={Signup}
-            options={{ headerShown: false }}
-          />
+          <Stack.Screen name="Signup" options={{ headerShown: false }}>
+            {(props) => <Signup {...props} setIsLoggedIn={setIsLoggedIn} />}
+          </Stack.Screen>
           <Stack.Screen
             name="MainApp"
             component={BottomTabs}

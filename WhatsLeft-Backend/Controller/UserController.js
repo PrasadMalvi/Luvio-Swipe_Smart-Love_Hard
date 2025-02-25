@@ -132,14 +132,19 @@ const signUpController = async (req, res) => {
 
     // Hash password
     const hashedPassword = await hashPassword(password);
-
+    const ageDate = new Date(age); // Convert age string to Date object
+    if (isNaN(ageDate.getTime())) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid date format for age." });
+    }
     // Save user
     const newUser = new UserData({
       name,
       email,
       password: hashedPassword,
       mobileNumber,
-      age,
+      age: ageDate,
       location,
       occupation,
       aboutMe,

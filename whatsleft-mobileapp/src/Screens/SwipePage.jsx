@@ -106,7 +106,7 @@ const SwipePage = () => {
                           style={[
                             styles.imageIndicatorLine,
                             idx === currentImageIndex && styles.activeImageIndicatorLine,
-                            { width: `${100 / users[index]?.profilePictures?.length}%` }, // Dynamic width
+                            { width: `${98 / users[index]?.profilePictures?.length}%` }, // Dynamic width
                           ]}
                         />
                       ))}
