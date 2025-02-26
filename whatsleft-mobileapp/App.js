@@ -76,7 +76,6 @@ export default function App() {
     const checkLoginStatus = async () => {
       const token = await AsyncStorage.getItem("authToken");
       setIsLoggedIn(token ? true : false);
-      console.log("setIsLoggedIn updated:", isLoggedIn); //add this line
     };
     checkLoginStatus();
   }, []);

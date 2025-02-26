@@ -1,9 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "./axiosSlice"; // ✅ Use Global Axios
 
-// Fetch all registered users
+// ✅ Fetch all registered users
 export const fetchUsers = createAsyncThunk("users/fetchUsers", async () => {
-  const response = await axios.get("/api/users");
+  const response = await axiosInstance.get("/api/users"); // ✅ Uses axiosInstance
   return response.data;
 });
 

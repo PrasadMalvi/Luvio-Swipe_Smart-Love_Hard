@@ -20,6 +20,9 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
+import axiosInstance from "../Redux/slices/axiosSlice";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+
 
 const { width, height } = Dimensions.get("window");
 
@@ -35,7 +38,7 @@ const SwipePage = () => {
       try {
         setLoading(true);
         const token = await AsyncStorage.getItem("authToken");
-        const response = await axios.get("http://192.168.0.101:5050/Swipe/getUsers", {
+        const response = await axiosInstance.get("/Swipe/getUsers", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (response.data.success) {
@@ -143,6 +146,7 @@ const SwipePage = () => {
                           {users[index]?.name}, {new Date().getFullYear() - new Date(users[index]?.age).getFullYear()}
                         </Text>
                         <Text style={styles.userOccupation}>
+                        <Icon name="briefcase" size={20}/>
                           {users[index]?.occupation || "Not specified"}
                         </Text>
                       </LinearGradient>
@@ -151,14 +155,21 @@ const SwipePage = () => {
                   <View style={styles.profileDetailsContainer}>
                     {users[index]?.aboutMe && (
                       <View style={styles.sectionContainer}>
+                      <View style={styles.iconTitleContainer}>
+                        <Icon name="account-heart" size={20} color="#c64d76" />
                         <Text style={styles.sectionTitle}>About Me</Text>
-                        <Text style={styles.sectionText}>{users[index].aboutMe}</Text>
                       </View>
+                      <Text style={styles.sectionText}>{users[index].aboutMe}</Text>
+                    </View>
+                    
                     )}
 
                     {users[index]?.relationshipPreference && (
                       <View style={styles.sectionContainer}>
-                        <Text style={styles.sectionTitle}>Preferences</Text>
+                        <View style={styles.iconTitleContainer}>
+        <Icon name="heart-multiple" size={20} color="#c64d76" />
+        <Text style={styles.sectionTitle}>Preferences</Text>
+      </View>
                         <View style={styles.preferenceChipsContainer}>
                           <View style={styles.preferenceChip}>
                           <LinearGradient
@@ -178,7 +189,10 @@ const SwipePage = () => {
 
                     {users[index]?.qualification && (
                       <View style={styles.sectionContainer}>
-                        <Text style={styles.sectionTitle}>Qualification</Text>
+                        <View style={styles.iconTitleContainer}>
+        <Icon name="school" size={20} color="#c64d76" />
+        <Text style={styles.sectionTitle}>Qualification</Text>
+      </View>
                         <View style={styles.preferenceChipsContainer}>
                           <View style={styles.preferenceChip}>
                           <LinearGradient
@@ -196,7 +210,10 @@ const SwipePage = () => {
 
                     {users[index]?.lookingFor && (
                       <View style={styles.sectionContainer}>
-                        <Text style={styles.sectionTitle}>Looking For</Text>
+                        <View style={styles.iconTitleContainer}>
+        <Icon name="account-search" size={20} color="#c64d76" />
+        <Text style={styles.sectionTitle}>Looking For</Text>
+      </View>
                         <View style={styles.preferenceChipsContainer}>
                           <View style={styles.preferenceChip}>
                           <LinearGradient
@@ -214,7 +231,10 @@ const SwipePage = () => {
 
                     {users[index]?.hobbies?.length > 0 && (
                       <View style={styles.sectionContainer}>
-                        <Text style={styles.sectionTitle}>Hobbies</Text>
+                        <View style={styles.iconTitleContainer}>
+        <Icon name="palette" size={20} color="#c64d76" />
+        <Text style={styles.sectionTitle}>Hobbies</Text>
+      </View>
                         <View style={styles.preferenceChipsContainer}>
                           {users[index].hobbies.map((hobby, i) => (
                             <View key={i} style={styles.preferenceChip}>
@@ -234,7 +254,10 @@ const SwipePage = () => {
 
                     {users[index]?.interests?.length > 0 && (
                       <View style={styles.sectionContainer}>
-                        <Text style={styles.sectionTitle}>Interests</Text>
+                        <View style={styles.iconTitleContainer}>
+        <Icon name="star" size={20} color="#c64d76" />
+        <Text style={styles.sectionTitle}>Interests</Text>
+      </View>
                         <View style={styles.preferenceChipsContainer}>
                           {users[index].interests.map((interests, i) => (
                             <View key={i} style={styles.preferenceChip}>
@@ -254,7 +277,10 @@ const SwipePage = () => {
 
                     {users[index]?.location && (
                       <View style={styles.sectionContainer}>
-                        <Text style={styles.sectionTitle}>Location</Text>
+                        <View style={styles.iconTitleContainer}>
+        <Icon name="map-marker" size={20} color="#c64d76" />
+        <Text style={styles.sectionTitle}>Location</Text>
+      </View>
                         <View style={styles.preferenceChipsContainer}>
                           <View style={styles.preferenceChip}>
                           <LinearGradient
@@ -272,7 +298,10 @@ const SwipePage = () => {
 
                     {users[index]?.height && (
                       <View style={styles.sectionContainer}>
-                      <Text style={styles.sectionTitle}>Height</Text>
+                      <View style={styles.iconTitleContainer}>
+        <Icon name="human-male-height" size={20} color="#c64d76" />
+        <Text style={styles.sectionTitle}>Height</Text>
+      </View>
                       <View style={styles.preferenceChipsContainer}>
                         <View style={styles.preferenceChip}>
                         <LinearGradient
@@ -290,7 +319,10 @@ const SwipePage = () => {
 
                   {users[index]?.zodiacSign && (
                     <View style={styles.sectionContainer}>
-                      <Text style={styles.sectionTitle}>ZodiacSign</Text>
+                      <View style={styles.iconTitleContainer}>
+        <Icon name="star-outline" size={20} color="#c64d76" />
+        <Text style={styles.sectionTitle}>Zodiac Sign</Text>
+      </View>
                       <View style={styles.preferenceChipsContainer}>
                         <View style={styles.preferenceChip}>
                         <LinearGradient
@@ -308,7 +340,10 @@ const SwipePage = () => {
 
                   {users[index]?.sexualOrientation && (
                     <View style={styles.sectionContainer}>
-                      <Text style={styles.sectionTitle}>Sexual Orientation</Text>
+                      <View style={styles.iconTitleContainer}>
+        <Icon name="gender-male-female" size={20} color="#c64d76" />
+        <Text style={styles.sectionTitle}>Sexual Orientation</Text>
+      </View>
                       <View style={styles.preferenceChipsContainer}>
                         <View style={styles.preferenceChip}>
                         <LinearGradient
@@ -326,7 +361,10 @@ const SwipePage = () => {
 
                   {users[index]?.familyPlans && (
                     <View style={styles.sectionContainer}>
-                      <Text style={styles.sectionTitle}>FamilyPlans</Text>
+                      <View style={styles.iconTitleContainer}>
+        <Icon name="home-heart" size={20} color="#c64d76" />
+        <Text style={styles.sectionTitle}>Family Plans</Text>
+      </View>
                       <View style={styles.preferenceChipsContainer}>
                         <View style={styles.preferenceChip}>
                         <LinearGradient
@@ -344,7 +382,10 @@ const SwipePage = () => {
 
                   {users[index]?.pets && (
                     <View style={styles.sectionContainer}>
-                      <Text style={styles.sectionTitle}>Pets</Text>
+                      <View style={styles.iconTitleContainer}>
+        <Icon name="paw" size={20} color="#c64d76" />
+        <Text style={styles.sectionTitle}>Pets</Text>
+      </View>
                       <View style={styles.preferenceChipsContainer}>
                         <View style={styles.preferenceChip}>
                         <LinearGradient
@@ -362,7 +403,10 @@ const SwipePage = () => {
 
                   {users[index]?.drinking && (
                     <View style={styles.sectionContainer}>
-                      <Text style={styles.sectionTitle}>Drinking</Text>
+                      <View style={styles.iconTitleContainer}>
+        <Icon name="glass-cocktail" size={20} color="#c64d76" />
+        <Text style={styles.sectionTitle}>Drinking</Text>
+      </View>
                       <View style={styles.preferenceChipsContainer}>
                         <View style={styles.preferenceChip}>
                         <LinearGradient
@@ -380,7 +424,10 @@ const SwipePage = () => {
 
                   {users[index]?.smoking && (
                     <View style={styles.sectionContainer}>
-                      <Text style={styles.sectionTitle}>Smoking</Text>
+                      <View style={styles.iconTitleContainer}>
+        <Icon name="smoking" size={20} color="#c64d76" />
+        <Text style={styles.sectionTitle}>Smoking</Text>
+      </View>
                       <View style={styles.preferenceChipsContainer}>
                         <View style={styles.preferenceChip}>
                         <LinearGradient
@@ -398,7 +445,10 @@ const SwipePage = () => {
 
                   {users[index]?.workout && (
                     <View style={styles.sectionContainer}>
-                      <Text style={styles.sectionTitle}>Workout</Text>
+                       <View style={styles.iconTitleContainer}>
+        <Icon name="dumbbell" size={20} color="#c64d76" />
+        <Text style={styles.sectionTitle}>Workout</Text>
+      </View>
                       <View style={styles.preferenceChipsContainer}>
                         <View style={styles.preferenceChip}>
                         <LinearGradient
@@ -416,7 +466,10 @@ const SwipePage = () => {
 
                   {users[index]?.sleepingHabits && (
                     <View style={styles.sectionContainer}>
-                      <Text style={styles.sectionTitle}>Sleeping Habits</Text>
+                      <View style={styles.iconTitleContainer}>
+        <Icon name="bed" size={20} color="#c64d76" />
+        <Text style={styles.sectionTitle}>Sleeping Habits</Text>
+      </View>
                       <View style={styles.preferenceChipsContainer}>
                         <View style={styles.preferenceChip}>
                         <LinearGradient
@@ -434,7 +487,10 @@ const SwipePage = () => {
 
                   {users[index]?.gender && (
                     <View style={styles.sectionContainer}>
-                      <Text style={styles.sectionTitle}>Gender</Text>
+                      <View style={styles.iconTitleContainer}>
+        <Icon name="gender-male-female" size={20} color="#c64d76" />
+        <Text style={styles.sectionTitle}>Gender</Text>
+      </View>
                       <View style={styles.preferenceChipsContainer}>
                         <View style={styles.preferenceChip}>
                         <LinearGradient
@@ -460,10 +516,10 @@ const SwipePage = () => {
     </ScrollView>
     <View style={styles.swipeButtonsContainer}>
       <TouchableOpacity onPress={() => handleSwipe("dislike")} style={styles.dislikeButton}>
-        <FontAwesome name="times" size={30} color="white" />
+        <FontAwesome name="times" size={25} color="white" />
       </TouchableOpacity>
       <TouchableOpacity onPress={() => handleSwipe("like")} style={styles.likeButton}>
-        <FontAwesome name="heart" size={30} color="white" />
+        <FontAwesome name="heart" size={25} color="white" />
       </TouchableOpacity>
     </View>
   </View>
@@ -600,13 +656,14 @@ swipeButtonsContainer: {
     backgroundColor: "red",
     padding: 15,
     borderRadius: 50,
-    width: 60,
+    width: 55,
     paddingLeft: 18,
     marginHorizontal: 20,
   },
   likeButton: {
     top:40,
     backgroundColor: "#b25776",
+    width: 55,
     padding: 15,
     borderRadius: 50,
     marginHorizontal: 20,
@@ -638,6 +695,12 @@ swipeButtonsContainer: {
     alignItems: 'center',
     borderRadius:25
   },
+  iconTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8, // Adds space between the icon and text
+  },
+  
 });
 
 export default SwipePage;

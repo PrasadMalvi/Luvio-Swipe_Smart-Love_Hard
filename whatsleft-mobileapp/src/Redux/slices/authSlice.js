@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { setAuthToken } from "./axiosSlice"; // ✅ Import setAuthToken
 
 const initialState = {
   user: null,
@@ -14,11 +15,17 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.token = action.payload.token;
       state.isAuthenticated = true;
+
+      // ✅ Update Axios with token
+      setAuthToken(action.payload.token);
     },
     logout: (state) => {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
+
+      // ✅ Remove token from Axios
+      setAuthToken(null);
     },
   },
 });

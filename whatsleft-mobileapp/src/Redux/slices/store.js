@@ -6,9 +6,9 @@ import chatReducer from "./chatSlice";
 
 export const store = configureStore({
   reducer: {
-    auth: authReducer, // Handles authentication (login/logout)
-    users: userReducer, // Stores registered users
-    messages: messagesReducer, // Stores messages & chats
-    chat: chatReducer, // Handles active chat state
+    auth: authReducer,
+    users: userReducer,
+    messages: messagesReducer,
+    chat: chatReducer,
   },
 });

@@ -5,7 +5,7 @@ import axios from "axios";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import moment from "moment";  // Install this: npm install moment
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import axiosInstance from "../Redux/slices/axiosSlice";
 
 const SignUp = ({ navigation , setIsLoggedIn}) => {
   
@@ -168,8 +168,8 @@ const SignUp = ({ navigation , setIsLoggedIn}) => {
               data.append("age", formData.age);
           }
   
-          const response = await axios.post(
-              'http://192.168.0.101:5050/Authentication/signUp',
+          const response = await axiosInstance.post(
+              '/Authentication/signUp',
               data,
               {
                   headers: { 'Content-Type': 'multipart/form-data' },
@@ -178,11 +178,7 @@ const SignUp = ({ navigation , setIsLoggedIn}) => {
           if (response.status === 201 && response.data.success) { //Check response.status
             const token = response.data.token;
             await AsyncStorage.setItem("authToken", token);
-            console.log("Signup successful!");
-            console.log("setIsLoggedIn called");
             setIsLoggedIn(true);
-            console.log("setIsLoggedIn finished");
-            console.log("Navigation called");
             navigation.navigate("MainApp");
         } else {
             console.log("Signup failed:", response.data);

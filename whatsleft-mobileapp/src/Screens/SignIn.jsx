@@ -9,8 +9,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import axios from "axios";
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axiosInstance from "../Redux/slices/axiosSlice";
 
 const SignIn = ({ navigation }) => {
   const [loginType, setLoginType] = useState("email"); // "email" or "mobile"
@@ -29,7 +29,7 @@ const handleEmailLogin = async () => {
 
   setLoading(true);
   try {
-    const response = await axios.post("http://192.168.0.101:5050/Authentication/signIn", {
+    const response = await axiosInstance.post("/Authentication/signIn", {
       email,
       password,
     });
@@ -58,7 +58,7 @@ const handleEmailLogin = async () => {
 
     setLoading(true);
     try {
-      const response = await axios.post("http://192.168.0.101:5050/Authentication/send-otp", {
+      const response = await axiosInstance.post("/Authentication/send-otp", {
         mobileNumber,
       });
 
@@ -84,7 +84,7 @@ const handleEmailLogin = async () => {
 
     setLoading(true);
     try {
-      const response = await axios.post("http://192.168.0.101:5050/Authentication/verifyOtp", {
+      const response = await axiosInstance.post("/Authentication/verifyOtp", {
         mobileNumber,
         otp,
       });
