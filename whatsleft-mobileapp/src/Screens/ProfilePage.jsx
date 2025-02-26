@@ -13,6 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
+import axiosInstance from "../Redux/slices/axiosSlice";
 
 
 const ProfileScreen = () => {
@@ -25,7 +26,7 @@ const ProfileScreen = () => {
     const fetchUser = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
-        const res = await axios.get("http://192.168.0.101:5050/Authentication/getUser", {
+        const res = await axiosInstance.get("/Authentication/getUser", {
           headers: { Authorization: `Bearer ${token}` },
         });
 

@@ -6,6 +6,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import moment from "moment";  // Install this: npm install moment
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axiosInstance from "../Redux/slices/axiosSlice";
+import MultiSelect from 'react-native-multiple-select';
 
 const SignUp = ({ navigation , setIsLoggedIn}) => {
   
@@ -337,8 +338,8 @@ const SignUp = ({ navigation , setIsLoggedIn}) => {
 
                 {/* Multi-Select Options */}
                 {[
-                  { key: "interests", label: "Interests", options: ["Music", "Sports", "Traveling", "Gaming", "Fitness"] },
-                  { key: "hobbies", label: "Hobbies", options: ["Reading", "Cooking", "Dancing", "Painting", "Photography"] },
+                  { key: "interests", label: "Interests", options: ["Technology", "Sports", "Art", "Food", "Music", "Traveling", "Gaming", "Fitness"] },
+                  { key: "hobbies", label: "Hobbies", options: ["Reading", "Gaming", "Traveling", "Cooking", "Dancing", "Painting", "Photography"] },
                 ].map(({ key, label, options }) => (
                   <View key={key}>
                     <Text style={styles.label}>{label}</Text>

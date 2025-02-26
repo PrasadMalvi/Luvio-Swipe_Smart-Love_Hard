@@ -12,6 +12,7 @@ import ChatsPage from "./src/Screens/ChatsPage";
 import ProfilePage from "./src/Screens/ProfilePage";
 import SettingsPage from "./src/Screens/SettingsPage";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import EditProfile from "./src/Screens/EditProfile";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -97,6 +98,11 @@ export default function App() {
           <Stack.Screen
             name="MainApp"
             component={BottomTabs}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="EditProfile"
+            component={EditProfile}
             options={{ headerShown: false }}
           />
         </Stack.Navigator>

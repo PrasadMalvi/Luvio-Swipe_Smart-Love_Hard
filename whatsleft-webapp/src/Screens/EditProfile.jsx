@@ -38,24 +38,24 @@ const EditProfile = () => {
   const options = {
     LookingFor: ["Long-term", "Short-term", "Friends", "Figuring Out"],
     RelationshipPreference: ["Monogamy", "Polygamy", "Open to Explore", "Ethical Non-Monogamy"],
-    Height: Array.from({ length: 35 }, (_, i) => `${4 + Math.floor(i / 12)}'${i % 12}"`),
+    Height: Array.from({ length: 35 }, (_, i) => `${4 + Math.floor(i / 12)}'${i % 12}`),
     Location: "",
     Occupation: "",
-    qalification: "",
+    Qualification:["High School", "Bachelor's Degree", "Master's Degree", "Doctorate"],
     Basics: {
-      ZodiacSign: ["Aries", "Taurus", "Gemini", "Cancer", "Leo"],
-      SexualOrientation: ["Straight", "Gay", "Bisexual", "Asexual", "Pansexual"],
-      FamilyPlans: ["Want Kids", "Don't Want Kids", "Not Sure"],
+      ZodiacSign: ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"],
+      SexualOrientation: ["Straight", "Gay","Heterosexual", "Homosexual", "Bisexual", "Asexual","Pansexual"],
+      FamilyPlans: ["Want Kids", "Don't Want Kids","Don't Want Kids aleady have", "Not Sure"],
     },
     Lifestyle: {
       Pets: ["Dog", "Cat", "Other", "None"],
-      Drinking: ["Never", "Occasionally", "Regularly"],
+      Alcohol: ["Never", "Occasionally", "Regularly"],
       Smoking: ["Never", "Occasionally", "Regularly"],
       Workout: ["Never", "Occasionally", "Regularly"],
       SleepingHabits: ["Early Bird", "Night Owl", "Flexible"],
     },
-    Hobbies: ["Reading", "Traveling", "Cooking", "Gaming"],
-    Interests: ["Technology", "Fitness", "Movies", "Photography"],
+    Hobbies: ["Reading", "Gaming", "Traveling", "Cooking", "Dancing", "Painting", "Photography"],
+    Interests: ["Technology", "Sports", "Art", "Food", "Music", "Traveling", "Gaming", "Fitness"],
   };
 
   useEffect(() => {
@@ -206,13 +206,8 @@ const EditProfile = () => {
         value={user.location}
         onChange={(e) => setUser({ ...user, location: e.target.value })}
         />
-        <input
-        type="text"
-        placeholder="Qualification"
-        className="w-full border-solid border-2 border-[#b25776] p-2 rounded-md mb-4 bg-gray-900"
-        value={user.qualification}
-        onChange={(e) => setUser({ ...user, qualification: e.target.value })}
-        />
+        
+
         <input
         type="text"
         placeholder="Occuption"
@@ -221,7 +216,7 @@ const EditProfile = () => {
         onChange={(e) => setUser({ ...user, occupation: e.target.value })}
         />
       {/* Selectable Fields with Modal */}
-      {["LookingFor", "RelationshipPreference", "Height"].map((field) => (
+      {["Qualification", "LookingFor", "RelationshipPreference", "Height"].map((field) => (
         <div key={field} className="flex justify-between items-center p-3 border-b cursor-pointer hover:text-[#b25776]" onClick={() => toggleModal(field)}>
           <span>{field.replace(/([A-Z])/g, " $1").trim()}</span>
           <FaChevronRight className="hover:text-[#b25776]"/>
@@ -249,7 +244,7 @@ const EditProfile = () => {
       {/* Bottom Sheet Modal */}
       <div className="h-[200] w-[400px]">
       {modalOpen && (
-       <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed bottom-16 left-1/2 transform -translate-x-1/2 bg-gray-800 p-4 rounded-lg shadow-lg w-[400px] max-h-[500px] -ml-8 mb-4 overflow-auto scrollbar-hide">
+       <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="fixed bottom-16 left-1/2 transform -translate-x-1/2 bg-gray-800 p-4 rounded-lg shadow-lg w-[400px] max-h-[500px] -ml-[29px] mb-4 overflow-auto scrollbar-hide">
             <div className="flex justify-between items-center mb-3">
               <button className="text-white fixed text-4xl ml-[340px]" onClick={() => setModalOpen(null)}>×</button>
             </div>

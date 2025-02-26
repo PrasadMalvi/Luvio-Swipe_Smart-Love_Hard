@@ -167,9 +167,9 @@ const SwipePage = () => {
                     {users[index]?.relationshipPreference && (
                       <View style={styles.sectionContainer}>
                         <View style={styles.iconTitleContainer}>
-        <Icon name="heart-multiple" size={20} color="#c64d76" />
-        <Text style={styles.sectionTitle}>Preferences</Text>
-      </View>
+                        <Icon name="heart-multiple" size={20} color="#c64d76" />
+                        <Text style={styles.sectionTitle}>Preferences</Text>
+                        </View>
                         <View style={styles.preferenceChipsContainer}>
                           <View style={styles.preferenceChip}>
                           <LinearGradient

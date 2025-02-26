@@ -262,8 +262,20 @@ const SignUp = () => {
           <>
             <input type="date" name="age" value={formData.age} onChange={handleChange} max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split("T")[0]} className="w-full p-3 border-2 border-[#b25776] rounded-lg " required />
             <input type="text" name="location" placeholder="Location" value={formData.location} onChange={handleChange} className="w-full p-3 border-2 border-[#b25776] rounded-lg" required />
-            <input type="text" name="qualification" placeholder="Education" value={formData.qualification} onChange={handleChange} className="w-full p-3 border-2 border-[#b25776] rounded-lg" required />
-            <input type="text" name="occupation" placeholder="Occupation" value={formData.occupation} onChange={handleChange} className="w-full p-3 border-2 border-[#b25776] rounded-lg" required />
+            <div key="qualification">
+      <h3 className="text-lg font-semibold text-gray-700">Education</h3>
+      <div className="flex flex-wrap gap-2 mt-1 ">
+        {["High School", "Bachelor's Degree", "Master's Degree", "Doctorate"].map((option) => (
+          <div
+            key={option}
+            className={`p-2 rounded-lg cursor-pointer bg-gray-700 ${formData.qualification === option ? "bg-gradient-to-r from-[#b25776] via-pink-60/50 to-black" : ""}`}
+            onClick={() => handleSelection("qualification", option)}
+          >
+            {option}
+          </div>
+        ))}
+      </div>
+    </div>            <input type="text" name="occupation" placeholder="Occupation" value={formData.occupation} onChange={handleChange} className="w-full p-3 border-2 border-[#b25776] rounded-lg" required />
           </>
         )}
 
@@ -298,7 +310,7 @@ const SignUp = () => {
             ))}
 
             {[{ key: "interests", label: "Interests", options: ["Music", "Sports", "Traveling", "Gaming", "Fitness"] },
-              { key: "hobbies", label: "Hobbies", options: ["Reading", "Cooking", "Dancing", "Painting", "Photography"] }].map(({ key, label, options }) => (
+              { key: "hobbies", label: "Hobbies", options: ["Reading", "Gaming", "Traveling", "Cooking", "Dancing", "Painting", "Photography"] }].map(({ key, label, options }) => (
               <div key={key}>
                 <h3 className="text-lg font-semibold text-gray-700">{label}</h3>
                 <div className="flex flex-wrap gap-2 mt-1">
