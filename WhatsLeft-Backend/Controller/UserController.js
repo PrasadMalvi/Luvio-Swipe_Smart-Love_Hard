@@ -2,6 +2,8 @@ const UserData = require("../Models/UserModule");
 const { hashPassword, comparePassword } = require("../Utils/HashedPassword");
 const JWT = require("jsonwebtoken");
 const otpService = require("../Utils/OtpService");
+const fs = require("fs");
+const path = require("path");
 
 // Sign-Up Controller
 const signUpController = async (req, res) => {
@@ -403,6 +405,53 @@ const updateProfileController = async (req, res) => {
   }
 };
 
+const removeProfileImageController = async (req, res) => {
+  try {
+    const { imageUrl } = req.body; // Get image URL from request body
+    const userId = req.user.id; // Get user ID from authentication middleware
+
+    if (!imageUrl) {
+      return res.status(400).json({ message: "Image URL is required" });
+    }
+
+    // Find the user
+    const user = await UserData.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if the image exists in the user's profile
+    const imageIndex = user.profileImages.indexOf(imageUrl);
+    if (imageIndex === -1) {
+      return res.status(404).json({ message: "Image not found in profile" });
+    }
+
+    // Remove image from the array
+    user.profileImages.splice(imageIndex, 1);
+    await user.save();
+
+    // Delete the image from the file system
+    const imagePath = path.join(
+      __dirname,
+      "../uploads",
+      path.basename(imageUrl)
+    );
+    fs.unlink(imagePath, (err) => {
+      if (err && err.code !== "ENOENT") {
+        console.error("Error deleting file:", err);
+      }
+    });
+
+    res.status(200).json({
+      message: "Image removed successfully",
+      updatedImages: user.profileImages,
+    });
+  } catch (error) {
+    console.error("Error removing image:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   signUpController,
   signInController,
@@ -410,4 +459,5 @@ module.exports = {
   verifyOtpController,
   getUserDetails,
   updateProfileController,
+  removeProfileImageController,
 };

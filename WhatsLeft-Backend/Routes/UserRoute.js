@@ -6,6 +6,7 @@ const {
   verifyOtpController,
   getUserDetails,
   updateProfileController,
+  removeProfileImageController,
 } = require("../Controller/UserController");
 
 const authenticate = require("../Middleware/authMiddleware.js");
@@ -35,6 +36,11 @@ router.put(
   upload.array("profileImage", 9),
   authenticate,
   updateProfileController
+);
+router.delete(
+  "/removeProfileImage",
+  authenticate,
+  removeProfileImageController
 );
 
 module.exports = router;
