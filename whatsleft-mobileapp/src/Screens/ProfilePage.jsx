@@ -14,6 +14,7 @@ import Icon from "react-native-vector-icons/FontAwesome5";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import axiosInstance from "../Redux/slices/axiosSlice";
+import ProfilePageSkeletonLoader from "../Components/Skeleton/ProfilePageSkeletonLoader";
 
 
 const ProfileScreen = () => {
@@ -110,9 +111,7 @@ const ProfileScreen = () => {
 
   if (loading)
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#b25776" />
-      </View>
+      <ProfilePageSkeletonLoader />
     );
 
   return (
@@ -320,12 +319,13 @@ const styles = StyleSheet.create({
   imageContainer: { 
     position: "relative",
     width:359,
-    height:611,
+    height:650,
     marginTop: 5,
 
    },
-  profileImage: {width: "100%",
-    height: "100%",
+  profileImage: {
+    width: "100%",
+    height: "95%",
     borderRadius: 10,
   },
   leftArrow: { position: "absolute",
@@ -338,7 +338,8 @@ const styles = StyleSheet.create({
     padding: 10,
     height:700,
     width:200,},
-  infoContainer: {marginTop: 10,
+  infoContainer: {
+    marginTop: 10,
     padding: 10,
     backgroundColor: "#333",
     borderRadius: 10,
@@ -357,7 +358,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 10,
     alignItems: "flex-start",
-    paddingBottom:40
+    paddingBottom:80
   },
   userNameAge: {
     color: "white",

@@ -16,6 +16,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { LinearGradient } from "expo-linear-gradient";
+import EditPageSkeletonLoader from "../Components/Skeleton/EditPageSkeletonLoader";
 
 const EditProfile = () => {
   const [user, setUser] = useState(null);
@@ -190,31 +191,29 @@ const EditProfile = () => {
 
   if (loading)
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#b25776" />
-      </View>
+      <EditPageSkeletonLoader />
     );
 
   return (
     <View style={styles.container}>
-    <ScrollView style={styles.containerScroll}>
-    <View style={styles.profileInfoGradient}>
-  <LinearGradient
-    colors={[
-      'rgba(198, 77, 118, 0.8)', // [#c64d76]/90
-      'rgba(178, 87, 118, 0.6)', // #b25776/60
-      'rgba(198, 77, 118, 0.3)', // [#c64d76]/30
-    ]}
-    start={{ x: 0.5, y: 0.5 }}
-    end={{ x: 1, y: 1 }}
-    style={styles.profileInfoGradientContent}
-  >
-    <Text style={styles.userNameAge}>
-      {user?.name}, {user?.age ? new Date().getFullYear() - new Date(user?.age).getFullYear() : 'Age Unknown'}
-    </Text>
-  </LinearGradient>
-</View>
-<View style={styles.imageCardsContainer}>
+      <ScrollView style={styles.containerScroll}>
+        <View style={styles.profileInfoGradient}>
+          <LinearGradient
+            colors={[
+              'rgba(198, 77, 118, 0.8)', // [#c64d76]/90
+              'rgba(178, 87, 118, 0.6)', // #b25776/60
+              'rgba(198, 77, 118, 0.3)', // [#c64d76]/30
+            ]}
+            start={{ x: 0.5, y: 0.5 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.profileInfoGradientContent}
+          >
+            <Text style={styles.userNameAge}>
+              {user?.name}, {user?.age ? new Date().getFullYear() - new Date(user?.age).getFullYear() : 'Age Unknown'}
+            </Text>
+          </LinearGradient>
+        </View>
+        <View style={styles.imageCardsContainer}>
           {Array.from({ length: 9 }).map((_, index) => {
             if (index < profilePictures.length) {
               const imageUri = profilePictures[index];
@@ -252,17 +251,20 @@ const EditProfile = () => {
           })}
         </View>
 
-      <View style={styles.formContainer}>
-        <View style={styles.sectionContainer}>
-        <View style={styles.iconTitleContainer}>
-                                <Icon name="account-heart" size={20} color="#c64d76" />
-                                <Text style={styles.sectionTitle}>About Me</Text>
-                              </View>
-        <TextInput
-          style={styles.input}
+        <View style={styles.formContainer}>
+          <View style={styles.sectionContainer}>
+          <View style={styles.iconTitleContainer}>
+                                  <Icon name="account-heart" size={20} color="#c64d76" />
+                                  <Text style={styles.sectionTitle}>About Me</Text>
+                                </View>
+                                <TextInput
+          style={styles.inputAboutMe}
           value={aboutMe}
           onChangeText={setAboutMe}
           placeholder="Tell us about yourself"
+          multiline={true} // Enable multiline input
+          numberOfLines={4} // Optional: Set the initial number of visible lines
+          textAlignVertical="top" // Start text from the top
         />
         </View>
         <View style={styles.sectionContainer}>
@@ -291,21 +293,21 @@ const EditProfile = () => {
 
         />
 
-<View style={styles.iconTitleContainer}>
-    <Icon name="school" size={20} color="#c64d76" />
-    <Text style={styles.sectionTitle}>Qualification</Text>
-</View>
-<View style={styles.optionsContainer}>
-    {qualifications.map((item) => (
-        <TouchableOpacity
-            key={item}
-            style={[styles.option, qualification === item && styles.selectedOption]}
-            onPress={() => setQualification(item)} // Corrected line
-        >
-            <Text style={styles.optionText}>{item}</Text>
-        </TouchableOpacity>
-    ))}
-</View>
+        <View style={styles.iconTitleContainer}>
+            <Icon name="school" size={20} color="#c64d76" />
+            <Text style={styles.sectionTitle}>Qualification</Text>
+        </View>
+        <View style={styles.optionsContainer}>
+            {qualifications.map((item) => (
+                <TouchableOpacity
+                    key={item}
+                    style={[styles.option, qualification === item && styles.selectedOption]}
+                    onPress={() => setQualification(item)} // Corrected line
+                >
+                    <Text style={styles.optionText}>{item}</Text>
+                </TouchableOpacity>
+            ))}
+        </View>
         <View style={styles.iconTitleContainer}>
                 <Icon name="account-search" size={20} color="#c64d76" />
                 <Text style={styles.sectionTitle}>Looking For</Text>
@@ -534,11 +536,8 @@ const EditProfile = () => {
       </View>
           
     </ScrollView>
-    <View style={styles.updateButton}>
-      <TouchableOpacity
-        
-        onPress={handleUpdateProfile}
-      >
+    <View>
+      <TouchableOpacity onPress={handleUpdateProfile} style={styles.updateButton}>
         <Text style={styles.updateButtonText}>Update Profile</Text>
       </TouchableOpacity>
       </View>
@@ -625,6 +624,14 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         marginTop: 5,
     },
+    inputAboutMe:{
+      backgroundColor: "#121212",
+      fontSize: 16,
+       color: "#b25776", 
+       padding: 15, 
+       borderRadius:15,
+       minHeight:150
+    },
     imageCardsContainer: {
         flexDirection: "row",
         flexWrap: "wrap",
@@ -679,12 +686,13 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 5,
         alignItems: "center",
-        marginTop: 0,
+        marginTop: -65,
         position:"static",
         zIndex:40,
         width:200,
         marginLeft:80,
-        borderRadius:25
+        borderRadius:25,
+        marginBottom:15
     },
     updateButtonText: {
         color: "white",

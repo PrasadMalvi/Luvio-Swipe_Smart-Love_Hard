@@ -22,7 +22,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import axiosInstance from "../Redux/slices/axiosSlice";
 import Icon from "react-native-vector-icons/FontAwesome5";
+import Icon6 from "react-native-vector-icons/FontAwesome6";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import SwipePageSkeletonLoader from "../Components/Skeleton/SwipePageSkeletonLoader";
 
 const { width, height } = Dimensions.get("window");
 
@@ -120,7 +122,7 @@ const SwipePage = () => {
   };
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#b25776" style={styles.loadingIndicator} />;
+    return <SwipePageSkeletonLoader />;
   }
   const fixImageUrl = (url) => {
     if (!url) return "https://via.placeholder.com/400"; // Default placeholder image
@@ -189,14 +191,14 @@ const SwipePage = () => {
                         style={styles.profileInfoGradientContent}
                       >
                         <Text style={styles.userNameAge}>
-                          {users[index]?.name}, {new Date().getFullYear() - new Date(users[index]?.age).getFullYear()}
-                          <View  style={styles.verifyIcon}>
-                          <MaterialIcons name="verified" size={24} color="#b25776"/>
-                          </View>
+                          {users[index]?.name} {new Date().getFullYear() - new Date(users[index]?.age).getFullYear()}
+                         
                         </Text>
-                        
+                        <View  style={styles.verifyIcon}>
+                          <MaterialIcons name="verified" size={22} color="#b25776"/>
+                          </View>
                         <Text style={styles.userOccupation}> 
-                        <Icon name="briefcase" size={20} color={"#b25776"}/>{"  "}
+                        <Icon name="briefcase" size={25} color={"#b25776"}/>{"  "}
                           {users[index]?.occupation || "Not specified"}
                         </Text>
                       </LinearGradient>
@@ -349,13 +351,23 @@ const SwipePage = () => {
       </GestureHandlerRootView>
     </ScrollView>
     <View style={styles.swipeButtonsContainer}>
-      <TouchableOpacity onPress={() => handleSwipe("dislike")} style={styles.dislikeButton}>
-        <FontAwesome name="times" size={25} color="white" />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleSwipe("like")} style={styles.likeButton}>
-        <FontAwesome name="heart" size={25} color="white" />
-      </TouchableOpacity>
-    </View>
+  <TouchableOpacity onPress={() => handleSwipe("goback")} style={styles.goBackButton}>
+    <FontAwesome name="rotate-left" size={19} color="yellow" />
+  </TouchableOpacity>
+  <TouchableOpacity onPress={() => handleSwipe("dislike")} style={styles.dislikeButton}>
+    <FontAwesome name="times" size={25} color="red" />
+  </TouchableOpacity>
+  <TouchableOpacity onPress={() => handleSwipe("superlike")} style={styles.superLike}>
+    <Icon6 name="heart-circle-bolt" size={30} color="#a594f9" />
+  </TouchableOpacity>
+  <TouchableOpacity onPress={() => handleSwipe("like")} style={styles.likeButton}>
+    <FontAwesome name="heart" size={25} color="#b25776" />
+  </TouchableOpacity>
+  <TouchableOpacity onPress={() => handleSwipe("share")} style={styles.shareButton}>
+    <FontAwesome name="share-alt" size={19} color="#abc4ff" />
+  </TouchableOpacity>
+  
+</View>
   </View>
 );
 };
@@ -371,6 +383,8 @@ loadingIndicator: {
 gestureRootView: {
   flex: 1,
   backgroundColor: "#111",
+  marginBottom:35
+
 },
 contentScrollView: {
   flex: 1,
@@ -381,13 +395,13 @@ contentContainer: {
 },
 profileImageContainer: {
   width: width * 1.0,
-  height: height * 0.8,
+  height: height * 0.85,
   position: "relative",
   marginTop: 5,
 },
 profileImage: {
   width: "100%",
-  height: "100%",
+  height: "95%",
   borderRadius: 10,
 },
 noImagesText: {
@@ -422,7 +436,7 @@ profileInfoGradientContent: {
   paddingHorizontal: 15,
   borderRadius: 10,
   alignItems: "flex-start",
-  paddingBottom:-40
+  paddingBottom:50
 },
 userNameAge: {
   color: "white",
@@ -430,9 +444,8 @@ userNameAge: {
   fontWeight: "bold",
 },
 verifyIcon:{
-  marginLeft:15,
-  marginTop:15,
-  zIndex:40
+  marginLeft: 145,
+  marginTop: -27,
 },
 userOccupation: {
   color: "white",
@@ -480,29 +493,67 @@ noProfilesText: {
   textAlign: 'center'
 },
 swipeButtonsContainer: {
-  flexDirection: "row",
-  marginTop: -110,
-  marginLeft: 80,
-  marginBottom: 50,
-  position: "static",
+    flexDirection: "row",
+    marginTop: -110, // Adjust overlap
+    marginBottom: 20,
+    marginLeft:25
   },
   dislikeButton: {
-    top:40,
-    backgroundColor: "red",
-    padding: 15,
+    backgroundColor: "#333",
     borderRadius: 50,
     width: 55,
-    paddingLeft: 18,
-    marginHorizontal: 20,
+    height: 55,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 5,
   },
   likeButton: {
-    top:40,
-    backgroundColor: "#b25776",
-    width: 55,
-    padding: 15,
+    backgroundColor: "#333",
     borderRadius: 50,
-    marginHorizontal: 20,
+    width: 55,
+    height: 55,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 5,
   },
+  superLike:{
+    backgroundColor: "#333",
+    borderRadius: 50,
+    width: 55,
+    height: 55,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 5,
+  },
+  goBackButton: {
+    backgroundColor: "#333",
+    marginTop:5,
+    borderRadius: 50,
+    width: 45,
+    height: 45,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 5,
+  },
+  shareButton: {
+    backgroundColor: "#333",
+    marginTop:5,
+    borderRadius: 50,
+    width: 45,
+    height: 45,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 5,
+  },
+  gradientContainer: {
+    minHeight: 40,
+    minWidth: 100,
+    width: "auto",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 25,
+  },
+
   imageIndicatorContainer: {
     position: "absolute",
     top: 2,
