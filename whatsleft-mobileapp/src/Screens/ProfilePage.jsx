@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
     top:8
   },
   sectionTitle: { fontSize: 20, fontWeight: "bold", color: "white", padding: 10, textAlign:"center" },
-  sectionContent: { fontSize: 16, backgroundColor: "#333", color: "#b25776", padding: 20, borderRadius:15, minHeight:100},
+  sectionContent: { fontSize: 16, backgroundColor: "#222", color: "#b25776", padding: 20, borderRadius:15, minHeight:100},
   chipContainer: { flexDirection: "row", flexWrap: "wrap", gap: 5, padding: 10, marginTop:-35, marginLeft:30, marginBottom:-10 },
   chipContainer1: { flexDirection: "row", flexWrap: "wrap", gap: 5, padding: 10 },
   chip: { color: "white", padding: 8, borderRadius: 10},

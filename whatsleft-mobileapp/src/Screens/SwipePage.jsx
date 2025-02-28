@@ -164,7 +164,7 @@ const SwipePage = () => {
                                         style={[
                                           styles.imageIndicatorLine,
                                           idx === currentImageIndex && styles.activeImageIndicatorLine,
-                                          { width: `${100 / users[index]?.profilePictures?.length}%`, marginRight: idx < users[index]?.profilePictures?.length - 1 ? '5px' : '0' },
+                                          { width: `${95 / users[index]?.profilePictures?.length}%`, marginRight: idx < users[index]?.profilePictures?.length - 1 ? '5px' : '0' },
                                         ]}
                                       />
                                     ))}
@@ -192,17 +192,21 @@ const SwipePage = () => {
                       >
                         <Text style={styles.userNameAge}>
                           {users[index]?.name} {new Date().getFullYear() - new Date(users[index]?.age).getFullYear()}
-                         
-                        </Text>
-                        <View  style={styles.verifyIcon}>
+                          <View  style={styles.verifyIcon}>
                           <MaterialIcons name="verified" size={22} color="#b25776"/>
                           </View>
+                        </Text>
+                        
                         <Text style={styles.userOccupation}> 
                         <Icon name="briefcase" size={25} color={"#b25776"}/>{"  "}
                           {users[index]?.occupation || "Not specified"}
                         </Text>
                       </LinearGradient>
                     </View>
+                    <View style={styles.scrollDown}>
+                          <Text style={{color:"yellow"}}>Scroll Down</Text>
+                          <Icon6 name="circle-down" size={25} color="yellow" />
+                        </View>
                   </View>
                   
                  
@@ -341,6 +345,7 @@ const SwipePage = () => {
                                     )
                                 )}
                               </View>
+                              
                
               </>
             ) : (
@@ -444,8 +449,16 @@ userNameAge: {
   fontWeight: "bold",
 },
 verifyIcon:{
-  marginLeft: 145,
-  marginTop: -27,
+  marginLeft: 140,
+  marginTop: 13,
+},
+scrollDown:{
+  marginLeft: 270,
+  marginTop: -100,
+  zIndex:50,
+  textAlign:"center",
+  justifyContent:"center",
+  alignItems:"center"
 },
 userOccupation: {
   color: "white",
@@ -477,7 +490,7 @@ section: { marginBottom: 10, backgroundColor: "none", borderRadius: 5 },
     top:8
   },
   sectionTitle: { fontSize: 20, fontWeight: "bold", color: "white", padding: 10, textAlign:"center" },
-  sectionContent: { fontSize: 16, backgroundColor: "#333", color: "#b25776", padding: 20, borderRadius:15, minHeight:100},
+  sectionContent: { fontSize: 16, backgroundColor: "#222", color: "#b25776", padding: 20, borderRadius:15, minHeight:100},
   chipContainer: { flexDirection: "row", flexWrap: "wrap", gap: 5, padding: 10, marginTop:-35, marginLeft:30, marginBottom:-10 },
   chipContainer1: { flexDirection: "row", flexWrap: "wrap", gap: 5, padding: 10 },
   chip: { color: "white", padding: 8, borderRadius: 10},

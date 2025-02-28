@@ -124,7 +124,7 @@ const EditProfile = () => {
           SetsleepingHabits(userData.sleepingHabits || "");
           setFamilyPlans(userData.familyPlans || "");
         }
-      } catch (error) {
+      } catch (error) { 
         console.error("Error fetching user data:", error);
       } finally {
         setLoading(false);
