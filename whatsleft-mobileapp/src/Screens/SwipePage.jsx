@@ -25,6 +25,8 @@ import Icon from "react-native-vector-icons/FontAwesome5";
 import Icon6 from "react-native-vector-icons/FontAwesome6";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import SwipePageSkeletonLoader from "../Components/Skeleton/SwipePageSkeletonLoader";
+import NoProfiles from "../Components/Swipe/ProfileCard";
+import LoadingProfilesScreen from "../Components/Swipe/LoadingProfilesScreen";
 
 const { width, height } = Dimensions.get("window");
 
@@ -33,6 +35,8 @@ const SwipePage = () => {
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [noProfilesLoading, setNoProfilesLoading] = useState(false);
+  const [userProfilePic, setUserProfilePic] = useState(null);
   const dispatch = useDispatch();
   const getIconName = (field) => {
     switch (field) {
@@ -95,19 +99,52 @@ const SwipePage = () => {
       }
     };
     fetchUsers();
+    fetchUserProfilePic(); // Fetch user profile picture
   }, []);
 
-  const handleSwipe = (direction) => {
-    if (users[index]) {
-      direction === "like"
-        ? dispatch(likeUser(users[index]))
-        : dispatch(dislikeUser(users[index]));
-    }
-    if (index < users.length - 1) {
-      setIndex(index + 1);
-      setCurrentImageIndex(0);
+  const fetchUserProfilePic = async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      const res = await axiosInstance.get("/Authentication/getUser", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (
+        res.data.success &&
+        res.data.user &&
+        res.data.user.profilePictures &&
+        res.data.user.profilePictures.length > 0
+      ) {
+        setUserProfilePic(res.data.user.profilePictures[0]);
+      }
+    } catch (error) {
+      console.error("Error fetching user profile pic:", error);
     }
   };
+
+  useEffect(() => {
+    if (users.length > 0 && index === users.length - 1 && !noProfilesLoading) {
+      setNoProfilesLoading(true);
+      setTimeout(() => {
+        setNoProfilesLoading(false);
+        setIndex(index + 1); // Increment index after loading
+      }, 3000);
+    }
+  }, [index, users.length, noProfilesLoading]);
+
+    const handleSwipe = (direction) => {
+        if (users[index]) {
+            direction === "like"
+                ? dispatch(likeUser(users[index]))
+                : dispatch(dislikeUser(users[index]));
+        }
+
+        if (index < users.length - 1) {
+            setIndex(index + 1);
+            setCurrentImageIndex(0);
+        } else {
+            // Last profile swiped, we will increment index after the loading is done.
+        }
+    };
 
   const handleNextImage = () => {
     if (users[index]?.profilePictures?.length > currentImageIndex + 1) {
@@ -152,7 +189,9 @@ const SwipePage = () => {
               contentContainerStyle={styles.contentContainer}
               showsVerticalScrollIndicator={false}
             >
-              {users.length > 0 ? (
+              {noProfilesLoading ? (
+                <LoadingProfilesScreen userProfilePic={userProfilePic} message="Loading more profiles..." />
+              ) : users.length > 0 && users[index] ? (
                 <>
                  
                  <View style={styles.profileImageContainer}>
@@ -349,7 +388,7 @@ const SwipePage = () => {
                
               </>
             ) : (
-              <Text style={styles.noProfilesText}>No More Profiles Available</Text>
+              <NoProfiles />
             )}
           </ScrollView>
         </PanGestureHandler>
