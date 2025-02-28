@@ -21,8 +21,8 @@ import { FontAwesome } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import axiosInstance from "../Redux/slices/axiosSlice";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-
+import Icon from "react-native-vector-icons/FontAwesome5";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 const { width, height } = Dimensions.get("window");
 
@@ -32,6 +32,48 @@ const SwipePage = () => {
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const dispatch = useDispatch();
+  const getIconName = (field) => {
+    switch (field) {
+      case "occupation":
+        return "briefcase";
+      case "location":
+        return "map-marker-alt";
+      case "qualification":
+        return "graduation-cap";
+      case "height":
+        return "ruler-vertical";
+      case "lookingFor":
+        return "search";
+      case "relationshipPreference":
+        return "heart";
+      case "zodiacSign":
+        return "star";
+      case "sexualOrientation":
+        return "transgender-alt";
+      case "gender":
+        return "user";
+      case "hobbies":
+        return "palette";
+      case "interests":
+        return "lightbulb";
+      case "aboutMe":
+        return "user-circle";
+      case "pet":
+        return "paw";
+      case "drinking":
+        return "wine-glass-alt";
+      case "smoking":
+        return "smoking";
+      case "workout":
+        return "dumbbell";
+      case "sleepingHabits":
+        return "bed";
+      case "familyPlans":
+        return "home";
+      default:
+        return "question"; // Default icon
+    }
+  };
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -80,6 +122,16 @@ const SwipePage = () => {
   if (loading) {
     return <ActivityIndicator size="large" color="#b25776" style={styles.loadingIndicator} />;
   }
+  const fixImageUrl = (url) => {
+    if (!url) return "https://via.placeholder.com/400"; // Default placeholder image
+    if (url.startsWith("file:///")) {
+      return url; // Return local file URI as is
+    }
+    if (!url.startsWith("http")) {
+      return `http://192.168.0.101:5050/${url}`; // Prefix server-relative URI
+    }
+    return url; // Return absolute HTTP URL as is
+  };
 
   return (
     <View style={styles.container}>
@@ -104,28 +156,22 @@ const SwipePage = () => {
                  <View style={styles.profileImageContainer}>
                     <View style={styles.imageIndicatorContainer}>
                       {users[index]?.profilePictures?.map((_, idx) => (
-                        <View
-                          key={idx}
-                          style={[
-                            styles.imageIndicatorLine,
-                            idx === currentImageIndex && styles.activeImageIndicatorLine,
-                            { width: `${98 / users[index]?.profilePictures?.length}%` }, // Dynamic width
-                          ]}
-                        />
-                      ))}
-                    </View>
-                    {users[index]?.profilePictures?.length > 0 ? (
-                      <Image
-                        source={{
-                          uri: `http://192.168.0.101:5050/${users[index].profilePictures[currentImageIndex].replace(/\\/g, "/")}`,
-                        }}
-                        style={styles.profileImage}
-                      />
+                                      
+                                      <View
+                                        key={idx}
+                                        style={[
+                                          styles.imageIndicatorLine,
+                                          idx === currentImageIndex && styles.activeImageIndicatorLine,
+                                          { width: `${100 / users[index]?.profilePictures?.length}%`, marginRight: idx < users[index]?.profilePictures?.length - 1 ? '5px' : '0' },
+                                        ]}
+                                      />
+                                    ))}
+                                  </View>
+                                  <Image
+                                    source={{ uri: fixImageUrl(users[index]?.profilePictures?.[currentImageIndex]) }}
+                                    style={styles.profileImage}
+                                  />
                       
-                    ) : (
-                      <Text style={styles.noImagesText}>No Images Available</Text>
-                    )}
-
                     {currentImageIndex > 0 && (
                       <TouchableOpacity onPress={handlePrevImage} style={styles.imageArrowLeft}>
                       </TouchableOpacity>
@@ -144,372 +190,156 @@ const SwipePage = () => {
                       >
                         <Text style={styles.userNameAge}>
                           {users[index]?.name}, {new Date().getFullYear() - new Date(users[index]?.age).getFullYear()}
+                          <View  style={styles.verifyIcon}>
+                          <MaterialIcons name="verified" size={24} color="#b25776"/>
+                          </View>
                         </Text>
-                        <Text style={styles.userOccupation}>
-                        <Icon name="briefcase" size={20}/>
+                        
+                        <Text style={styles.userOccupation}> 
+                        <Icon name="briefcase" size={20} color={"#b25776"}/>{"  "}
                           {users[index]?.occupation || "Not specified"}
                         </Text>
                       </LinearGradient>
                     </View>
                   </View>
                   
-                  <View style={styles.profileDetailsContainer}>
+                 
 
-                  {users[index]?.relationshipPreference && (
-                      <View style={styles.sectionContainer}>
-                        <View style={styles.iconTitleContainer}>
-                        <Icon name="heart-multiple" size={20} color="#c64d76" />
-                        <Text style={styles.sectionTitle}>Preferences</Text>
-                        </View>
-                        <View style={styles.preferenceChipsContainer}>
-                          <View style={styles.preferenceChip}>
-                          <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                            <Text style={styles.preferenceChipText}>
-                              {users[index].relationshipPreference}
-                            </Text>
-                            </LinearGradient>
-                          </View>
-                        </View>
-                      </View>
-                    )}
-
-                    {users[index]?.aboutMe && (
-                      <View style={styles.sectionContainer}>
-                      <View style={styles.iconTitleContainer}>
-                        <Icon name="account-heart" size={20} color="#c64d76" />
-                        <Text style={styles.sectionTitle}>About Me</Text>
-                      </View>
-                      <Text style={styles.sectionText}>{users[index].aboutMe}</Text>
-                    </View>
-                    
-                    )}
-                    {users[index]?.lookingFor && (
-                      <View style={styles.sectionContainer}>
-                        <View style={styles.iconTitleContainer}>
-                          <Icon name="account-search" size={20} color="#c64d76" />
-                          <Text style={styles.sectionTitle}>Looking For</Text>
-                        </View>
-                        <View style={styles.preferenceChipsContainer}>
-                          <View style={styles.preferenceChip}>
-                          <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                            <Text style={styles.preferenceChipText}>{users[index].lookingFor}</Text>
-                            </ LinearGradient >
-                          </View>
-                        </View>
-                      </View>
-                    )}
-                    
-
-                    {users[index]?.qualification && (
-                      <View style={styles.sectionContainer}>
-                        <View style={styles.iconTitleContainer}>
-        <Icon name="school" size={20} color="#c64d76" />
-        <Text style={styles.sectionTitle}>Qualification</Text>
-      </View>
-                        <View style={styles.preferenceChipsContainer}>
-                          <View style={styles.preferenceChip}>
-                          <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                            <Text style={styles.preferenceChipText}>{users[index].qualification}</Text>
-                            </ LinearGradient >
-                          </View>
-                        </View>
-                      </View>
-                    )}
-
-
-
-                    {users[index]?.hobbies?.length > 0 && (
-                      <View style={styles.sectionContainer}>
-                        <View style={styles.iconTitleContainer}>
-        <Icon name="palette" size={20} color="#c64d76" />
-        <Text style={styles.sectionTitle}>Hobbies</Text>
-      </View>
-                        <View style={styles.preferenceChipsContainer}>
-                          {users[index].hobbies.map((hobby, i) => (
-                            <View key={i} style={styles.preferenceChip}>
-                              <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                              <Text style={styles.preferenceChipText}>{hobby}</Text>
-                              </ LinearGradient >
-                            </View>
-                          ))}
-                        </View>
-                      </View>
-                    )}
-
-                    {users[index]?.interests?.length > 0 && (
-                      <View style={styles.sectionContainer}>
-                        <View style={styles.iconTitleContainer}>
-        <Icon name="star" size={20} color="#c64d76" />
-        <Text style={styles.sectionTitle}>Interests</Text>
-      </View>
-                        <View style={styles.preferenceChipsContainer}>
-                          {users[index].interests.map((interests, i) => (
-                            <View key={i} style={styles.preferenceChip}>
-                              <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                              <Text style={styles.preferenceChipText}>{interests}</Text>
-                              </ LinearGradient >
-                            </View>
-                          ))}
-                        </View>
-                      </View>
-                    )}
-
-                    {users[index]?.location && (
-                      <View style={styles.sectionContainer}>
-                        <View style={styles.iconTitleContainer}>
-        <Icon name="map-marker" size={20} color="#c64d76" />
-        <Text style={styles.sectionTitle}>Location</Text>
-      </View>
-                        <View style={styles.preferenceChipsContainer}>
-                          <View style={styles.preferenceChip}>
-                          <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                            <Text style={styles.preferenceChipText}>{users[index].location}</Text>
-                            </ LinearGradient >
-                          </View>
-                        </View>
-                      </View>
-                    )}
-
-                    {users[index]?.height && (
-                      <View style={styles.sectionContainer}>
-                      <View style={styles.iconTitleContainer}>
-        <Icon name="human-male-height" size={20} color="#c64d76" />
-        <Text style={styles.sectionTitle}>Height</Text>
-      </View>
-                      <View style={styles.preferenceChipsContainer}>
-                        <View style={styles.preferenceChip}>
-                        <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                          <Text style={styles.preferenceChipText}>{users[index].height}</Text>
-                          </ LinearGradient >
-                        </View>
-                      </View>
-                    </View>
-                  )}
-
-                  {users[index]?.zodiacSign && (
-                    <View style={styles.sectionContainer}>
-                      <View style={styles.iconTitleContainer}>
-        <Icon name="star-outline" size={20} color="#c64d76" />
-        <Text style={styles.sectionTitle}>Zodiac Sign</Text>
-      </View>
-                      <View style={styles.preferenceChipsContainer}>
-                        <View style={styles.preferenceChip}>
-                        <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                          <Text style={styles.preferenceChipText}>{users[index].zodiacSign}</Text>
-                          </ LinearGradient >
-                        </View>
-                      </View>
-                    </View>
-                  )}
-
-                  {users[index]?.sexualOrientation && (
-                    <View style={styles.sectionContainer}>
-                      <View style={styles.iconTitleContainer}>
-        <Icon name="gender-male-female" size={20} color="#c64d76" />
-        <Text style={styles.sectionTitle}>Sexual Orientation</Text>
-      </View>
-                      <View style={styles.preferenceChipsContainer}>
-                        <View style={styles.preferenceChip}>
-                        <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                          <Text style={styles.preferenceChipText}>{users[index].sexualOrientation}</Text>
-                          </ LinearGradient >
-                        </View>
-                      </View>
-                    </View>
-                  )}
-
-                  {users[index]?.familyPlans && (
-                    <View style={styles.sectionContainer}>
-                      <View style={styles.iconTitleContainer}>
-        <Icon name="home-heart" size={20} color="#c64d76" />
-        <Text style={styles.sectionTitle}>Family Plans</Text>
-      </View>
-                      <View style={styles.preferenceChipsContainer}>
-                        <View style={styles.preferenceChip}>
-                        <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                          <Text style={styles.preferenceChipText}>{users[index].familyPlans}</Text>
-                          </ LinearGradient >
-                        </View>
-                      </View>
-                    </View>
-                  )}
-
-                  {users[index]?.pets && (
-                    <View style={styles.sectionContainer}>
-                      <View style={styles.iconTitleContainer}>
-        <Icon name="paw" size={20} color="#c64d76" />
-        <Text style={styles.sectionTitle}>Pets</Text>
-      </View>
-                      <View style={styles.preferenceChipsContainer}>
-                        <View style={styles.preferenceChip}>
-                        <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                          <Text style={styles.preferenceChipText}>{users[index].pets}</Text>
-                          </ LinearGradient >
-                        </View>
-                      </View>
-                    </View>
-                  )}
-
-                  {users[index]?.drinking && (
-                    <View style={styles.sectionContainer}>
-                      <View style={styles.iconTitleContainer}>
-        <Icon name="glass-cocktail" size={20} color="#c64d76" />
-        <Text style={styles.sectionTitle}>Drinking</Text>
-      </View>
-                      <View style={styles.preferenceChipsContainer}>
-                        <View style={styles.preferenceChip}>
-                        <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                          <Text style={styles.preferenceChipText}>{users[index].drinking}</Text>
-                          </ LinearGradient >
-                        </View>
-                      </View>
-                    </View>
-                  )}
-
-                  {users[index]?.smoking && (
-                    <View style={styles.sectionContainer}>
-                      <View style={styles.iconTitleContainer}>
-        <Icon name="smoking" size={20} color="#c64d76" />
-        <Text style={styles.sectionTitle}>Smoking</Text>
-      </View>
-                      <View style={styles.preferenceChipsContainer}>
-                        <View style={styles.preferenceChip}>
-                        <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                          <Text style={styles.preferenceChipText}>{users[index].smoking}</Text>
-                          </ LinearGradient >
-                        </View>
-                      </View>
-                    </View>
-                  )}
-
-                  {users[index]?.workout && (
-                    <View style={styles.sectionContainer}>
-                       <View style={styles.iconTitleContainer}>
-        <Icon name="dumbbell" size={20} color="#c64d76" />
-        <Text style={styles.sectionTitle}>Workout</Text>
-      </View>
-                      <View style={styles.preferenceChipsContainer}>
-                        <View style={styles.preferenceChip}>
-                        <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                          <Text style={styles.preferenceChipText}>{users[index].workout}</Text>
-                          </ LinearGradient >
-                        </View>
-                      </View>
-                    </View>
-                  )}
-
-                  {users[index]?.sleepingHabits && (
-                    <View style={styles.sectionContainer}>
-                      <View style={styles.iconTitleContainer}>
-        <Icon name="bed" size={20} color="#c64d76" />
-        <Text style={styles.sectionTitle}>Sleeping Habits</Text>
-      </View>
-                      <View style={styles.preferenceChipsContainer}>
-                        <View style={styles.preferenceChip}>
-                        <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                          <Text style={styles.preferenceChipText}>{users[index].sleepingHabits}</Text>
-                          </ LinearGradient >
-                        </View>
-                      </View>
-                    </View>
-                  )}
-
-                  {users[index]?.gender && (
-                    <View style={styles.sectionContainer}>
-                      <View style={styles.iconTitleContainer}>
-        <Icon name="gender-male-female" size={20} color="#c64d76" />
-        <Text style={styles.sectionTitle}>Gender</Text>
-      </View>
-                      <View style={styles.preferenceChipsContainer}>
-                        <View style={styles.preferenceChip}>
-                        <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                            <Text style={styles.preferenceChipText}>{users[index].gender}</Text>
-                          </ LinearGradient >
-                        </View>
-                      </View>
-                    </View>
-                  )}
-                </View>
+                  {/* User Info */}
+                              <View style={styles.sectionContainer}>
+                                
+                              {["lookingFor", "relationshipPreference",].map(
+                                (field, idx) =>
+                                  users[index]?.[field] && (
+                                    <View key={idx} style={styles.section}>
+                                      <View style={styles.iconTitleContainer1}>
+                                        <Icon name={getIconName(field)} size={20} color="#c64d76" />
+                                        <Text style={styles.sectionTitle}>
+                                          {field.replace(/([A-Z])/g, " $1").trim().replace(/^./, (char) => char.toUpperCase())}
+                                        </Text>
+                                      </View>
+                                      <View style={styles.chipContainer1}>
+                                        <LinearGradient
+                                          colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
+                                          style={styles.gradientContainer}
+                                          start={{ x: 0, y: 0.5 }}
+                                          end={{ x: 1, y: 0.5 }}
+                                        >
+                                        <Text style={styles.chip}>{users[index][field]}</Text>
+                                        </LinearGradient>
+                                      </View>
+                                    </View>
+                                  )
+                              )}
+                              </View>
+                              <View style={styles.sectionContainer}>
+                                {/* About Me Section */}
+                                {users[index]?.aboutMe && (
+                                  <View style={styles.section}>
+                                  <View style={styles.iconTitleContainer1}>
+                                    <Icon name={getIconName("aboutMe")} size={20} color="#c64d76" />
+                                    <Text style={styles.sectionTitle}>About Me</Text>
+                                  </View>
+                                <Text style={styles.sectionContent}>{users[index].aboutMe}</Text>
+                                </View>
+                                )}
+                              </View>
+                  
+                              <View style={styles.sectionContainer}>
+                                 <Text style={styles.sectionTitle}>Basic Info</Text>
+                                 <View style={styles.horizontalLine} />
+                              {/* Dynamic Fields */}
+                              {["location", "height","sexualOrientation", "gender","zodiacSign"].map(
+                                (field, idx, array) =>
+                                  users[index]?.[field] && (
+                                    <React.Fragment key={idx}>
+                                      <View style={styles.section}>
+                                        <View style={styles.iconTitleContainer1}>
+                                          <Icon name={getIconName(field)} size={20} color="#c64d76" />
+                                        </View>
+                                        <View style={styles.chipContainer}>
+                                          <Text style={styles.chip}>{users[index]?.[field]}</Text>
+                                        </View>
+                                      </View>
+                                      {idx < array.length  && <View style={styles.horizontalLine} />}
+                                    </React.Fragment>
+                                  )
+                              )}
+                              </View>
+                  
+                              
+                              
+                              <View style={styles.sectionContainer}>
+                             {/* Hobbies */}
+                             {users[index]?.hobbies?.length > 0 && (
+                                <View style={styles.section}>
+                                  <View style={styles.iconTitleContainer1}>
+                                        <Icon name={getIconName("hobbies")} size={20} color="#c64d76" />
+                                        <Text style={styles.sectionTitle}>Hobbies</Text>
+                                      </View>
+                                      <View style={styles.horizontalLine} />
+                                  <View style={styles.chipContainer1}>
+                                    {users[index]?.hobbies.map((hobby, i) => (
+                                      <LinearGradient
+                                        key={i}
+                                        colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
+                                        style={styles.gradientContainer}
+                                        start={{ x: 0, y: 0.5 }}
+                                        end={{ x: 1, y: 0.5 }}
+                                      >
+                                        <Text style={styles.chip}>{hobby}</Text>
+                                      </LinearGradient>
+                                    ))}
+                                  </View>
+                                </View>
+                              )}
+                  
+                              {/* Interests */}
+                              {users[index]?.interests?.length > 0 && (
+                                <View style={styles.section}>
+                                  <View style={styles.iconTitleContainer1}>
+                                        <Icon name={getIconName("interests")} size={20} color="#c64d76" />
+                                        <Text style={styles.sectionTitle}>Interests</Text>
+                                      </View>
+                                      <View style={styles.horizontalLine} />
+                                  <View style={styles.chipContainer1}>
+                                    {users[index].interests.map((interest, i) => (
+                                      <LinearGradient
+                                        key={i}
+                                        colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
+                                        style={styles.gradientContainer}
+                                        start={{ x: 0, y: 0.5 }}
+                                        end={{ x: 1, y: 0.5 }}
+                                      >
+                                        <Text style={styles.chip}>{interest}</Text>
+                                      </LinearGradient>
+                                    ))}
+                                  </View>
+                                </View>
+                              )}
+                              </View>
+                  
+                              <View style={styles.sectionContainer}>
+                              <Text style={styles.sectionTitle}>Life Style</Text>
+                              <View style={styles.horizontalLine} />
+                                {["pet", "drinking", "smoking", "workout", "sleepingHabits", "familyPlans"].map(
+                                  (field, idx, array) =>
+                                    users[index]?.[field] && (
+                                      <React.Fragment key={idx}>
+                                        <View style={styles.section}>
+                                          <View style={styles.iconTitleContainer1}>
+                                            <Icon name={getIconName(field)} size={20} color="#c64d76" />
+                                          </View>
+                                          <View style={styles.chipContainer}>
+                                            <Text style={styles.chip}>{users[index]?.[field]}</Text>
+                                          </View>
+                                        </View>
+                                        {idx < array.length  && <View style={styles.horizontalLine} />}
+                                      </React.Fragment>
+                                    )
+                                )}
+                              </View>
+               
               </>
             ) : (
               <Text style={styles.noProfilesText}>No More Profiles Available</Text>
@@ -592,11 +422,17 @@ profileInfoGradientContent: {
   paddingHorizontal: 15,
   borderRadius: 10,
   alignItems: "flex-start",
+  paddingBottom:-40
 },
 userNameAge: {
   color: "white",
   fontSize: 25,
   fontWeight: "bold",
+},
+verifyIcon:{
+  marginLeft:15,
+  marginTop:15,
+  zIndex:40
 },
 userOccupation: {
   color: "white",
@@ -611,36 +447,31 @@ profileDetailsContainer: {
   padding: 20,
   borderRadius: 10,
 },
-sectionContainer: {
-  marginTop: 10,
-  padding: 10,
-  backgroundColor: "#333",
-  borderRadius: 10,
-},
-sectionTitle: {
-  color: "#b25776",
-  fontSize: 18,
-  fontWeight: "bold",
-},
+section: { marginBottom: 10, backgroundColor: "none", borderRadius: 5 },
+  sectionContainer: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#000",
+    borderRadius: 10,
+    width:350,
+  },
+  iconTitleContainer1: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom:5,
+    left:10,
+    top:8
+  },
+  sectionTitle: { fontSize: 20, fontWeight: "bold", color: "white", padding: 10, textAlign:"center" },
+  sectionContent: { fontSize: 16, backgroundColor: "#333", color: "#b25776", padding: 20, borderRadius:15, minHeight:100},
+  chipContainer: { flexDirection: "row", flexWrap: "wrap", gap: 5, padding: 10, marginTop:-35, marginLeft:30, marginBottom:-10 },
+  chipContainer1: { flexDirection: "row", flexWrap: "wrap", gap: 5, padding: 10 },
+  chip: { color: "white", padding: 8, borderRadius: 10},
 sectionText: {
   color: "white",
   fontSize: 16,
   marginTop: 5,
-},
-preferenceChipsContainer: {
-  flexDirection: "row",
-  flexWrap: "wrap",
-  gap: 2,
-  marginTop: 5,
-},
-preferenceChip: {
-  paddingVertical: 5,
-  paddingHorizontal: 10,
-  borderRadius: 2,
-},
-preferenceChipText: {
-  color: "white",
-  fontSize: 14,
 },
 noProfilesText: {
   fontSize: 22,
@@ -650,7 +481,7 @@ noProfilesText: {
 },
 swipeButtonsContainer: {
   flexDirection: "row",
-  marginTop: -70,
+  marginTop: -110,
   marginLeft: 80,
   marginBottom: 50,
   position: "static",
@@ -704,7 +535,12 @@ swipeButtonsContainer: {
     alignItems: "center",
     gap: 8, // Adds space between the icon and text
   },
-  
+  horizontalLine: {
+    height: 1,
+    backgroundColor: "#333",
+    width: "100%",
+    marginVertical: 2,    
+  },
 });
 
 export default SwipePage;

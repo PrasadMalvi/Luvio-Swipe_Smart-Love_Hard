@@ -4,12 +4,9 @@ const getUsers = async (req, res) => {
   try {
     const loggedInUserId = req.user.id;
 
-    const users = await UserData.find({ _id: { $ne: loggedInUserId } })
-      .select(
-        "name age location interests profilePictures occupation relationshipPreference lookingFor hobbies aboutMe"
-      )
-      .limit(10);
-
+    const users = await UserData.find({ _id: { $ne: loggedInUserId } }).select(
+      "name age location interests profilePictures occupation relationshipPreference lookingFor hobbies aboutMe height qualification zodiacSign sexualOrientation familyPlans pet drinking smoking workout sleepingHabits gender"
+    );
     return res.status(200).json({
       success: true,
       users,

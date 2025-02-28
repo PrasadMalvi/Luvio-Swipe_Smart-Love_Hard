@@ -155,18 +155,18 @@ const ProfileScreen = () => {
                 )}
               </>
             )}
-            <View style={styles.profileInfoGradient}>
-                                  <LinearGradient
-                                    colors={["rgba(0,0,0,1)", "rgba(0,0,0,0.65)", "transparent"]}
-                                    start={{ x: 0.5, y: 1 }}
-                                    end={{ x: 0.5, y: 0 }}
-                                    style={styles.profileInfoGradientContent}
-                                  >
-                                    <Text style={styles.userNameAge}>
-                                      {user?.name}, {new Date().getFullYear() - new Date(user?.age).getFullYear()}
-                                    </Text>
-                                  </LinearGradient>
-                                </View>
+              <View style={styles.profileInfoGradient}>
+                <LinearGradient
+                  colors={["rgba(0,0,0,1)", "rgba(0,0,0,0.65)", "transparent"]}
+                  start={{ x: 0.5, y: 1 }}
+                  end={{ x: 0.5, y: 0 }}
+                  style={styles.profileInfoGradientContent}
+                >
+                  <Text style={styles.userNameAge}>
+                    {user?.name}, {new Date().getFullYear() - new Date(user?.age).getFullYear()}
+                  </Text>
+                </LinearGradient>
+              </View>
             </View>
 
             {/* User Info */}
@@ -231,8 +231,6 @@ const ProfileScreen = () => {
             )}
             </View>
 
-            
-            
             <View style={styles.sectionContainer}>
            {/* Hobbies */}
            {user?.hobbies?.length > 0 && (
@@ -318,9 +316,18 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#121212" },
   scrollContainer: { paddingBottom: 80 },
-  profileContainer: { alignItems: "center", paddingTop: 20, },
-  imageContainer: { position: "relative" },
-  profileImage: { width: 350, height: 600, borderRadius: 10 },
+  profileContainer: { alignItems: "center", paddingTop: 0, },
+  imageContainer: { 
+    position: "relative",
+    width:359,
+    height:611,
+    marginTop: 5,
+
+   },
+  profileImage: {width: "100%",
+    height: "100%",
+    borderRadius: 10,
+  },
   leftArrow: { position: "absolute",
     left: 10,
     padding: 10,
@@ -350,7 +357,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 10,
     alignItems: "flex-start",
-    paddingBottom:50
+    paddingBottom:40
   },
   userNameAge: {
     color: "white",
@@ -373,10 +380,10 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom:5,
     left:10,
-    top:10
+    top:8
   },
   sectionTitle: { fontSize: 20, fontWeight: "bold", color: "white", padding: 10, textAlign:"center" },
-  sectionContent: { fontSize: 16, backgroundColor: "#333", color: "#b25776", padding: 20, borderRadius:25, minHeight:100},
+  sectionContent: { fontSize: 16, backgroundColor: "#333", color: "#b25776", padding: 20, borderRadius:15, minHeight:100},
   chipContainer: { flexDirection: "row", flexWrap: "wrap", gap: 5, padding: 10, marginTop:-35, marginLeft:30, marginBottom:-10 },
   chipContainer1: { flexDirection: "row", flexWrap: "wrap", gap: 5, padding: 10 },
   chip: { color: "white", padding: 8, borderRadius: 10},
@@ -412,7 +419,7 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#333",
     width: "100%",
-    marginVertical: 2,    
+    marginVertical: 2,   
   },
 });
 
