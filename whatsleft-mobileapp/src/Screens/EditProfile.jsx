@@ -35,12 +35,12 @@ const EditProfile = () => {
   const [hobbies, setHobbies] = useState([]);
   const [interests, setInterests] = useState([]);
   const [profilePictures, setProfilePictures] = useState([]);
-  const [pet, setPet] = useState([]);
-  const [drinking, setDrinking] = useState([]);
-  const [smoking, setSmoking] = useState([]);
-  const [workout, setWorkout] = useState([]);
-  const [sleepingHabits, SetsleepingHabits] = useState([]);
-  const [familyPlans, setFamilyPlans] = useState([]);
+  const [pet, setPet] = useState("");
+  const [drinking, setDrinking] = useState("");
+  const [smoking, setSmoking] = useState("");
+  const [workout, setWorkout] = useState("");
+  const [sleepingHabits, SetsleepingHabits] = useState("");
+  const [familyPlans, setFamilyPlans] = useState("");
   const navigation = useNavigation();
 
   const [openLookingFor, setOpenLookingFor] = useState(true);
@@ -116,6 +116,12 @@ const EditProfile = () => {
           setHobbies(userData.hobbies || []);
           setInterests(userData.interests || []);
           setProfilePictures(userData.profilePictures || []);
+          setPet(userData.pet || ""); 
+          setDrinking(userData.drinking || "");
+          setSmoking(userData.smoking || "");
+          setWorkout(userData.workout || "");
+          SetsleepingHabits(userData.sleepingHabits || "");
+          setFamilyPlans(userData.familyPlans || "");
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -145,9 +151,15 @@ const EditProfile = () => {
         hobbies,
         interests,
         profilePictures,
+        pet,
+        drinking,
+        smoking,
+        workout,
+        sleepingHabits,
+        familyPlans,
       };
 
-      await axiosInstance.put("/Authentication/updateUser", updatedData, {
+      await axiosInstance.put("/Authentication/updateProfile", updatedData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       navigation.goBack();
@@ -202,34 +214,43 @@ const EditProfile = () => {
     </Text>
   </LinearGradient>
 </View>
-      <View style={styles.imageCardsContainer}>
-      
-        {Array.from({ length: 9 }).map((_, index) => {
-          if (index < profilePictures.length) {
-            return (
-              <View key={index} style={styles.imageCard}>
-                <Image source={{ uri: `http://192.168.0.101:5050/${profilePictures[index]}` }} style={styles.image} />
+<View style={styles.imageCardsContainer}>
+          {Array.from({ length: 9 }).map((_, index) => {
+            if (index < profilePictures.length) {
+              const imageUri = profilePictures[index];
+              const isLocalFile = imageUri.startsWith("file:///");
+
+              return (
+                <View key={index} style={styles.imageCard}>
+                  <Image
+                    source={{
+                      uri: isLocalFile
+                        ? imageUri
+                        : `http://192.168.0.101:5050/${imageUri}`,
+                    }}
+                    style={styles.image}
+                  />
+                  <TouchableOpacity
+                    onPress={() => handleRemoveImage(index)}
+                    style={styles.removeBtn}
+                  >
+                    <Text style={styles.removeText}>X</Text>
+                  </TouchableOpacity>
+                </View>
+              );
+            } else {
+              return (
                 <TouchableOpacity
-                  onPress={() => handleRemoveImage(index)}
-                  style={styles.removeBtn}
+                  key={index}
+                  onPress={handleImagePick}
+                  style={styles.addImageCard}
                 >
-                  <Text style={styles.removeText}>X</Text>
+                  <Text style={styles.addText}>+</Text>
                 </TouchableOpacity>
-              </View>
-            );
-          } else {
-            return (
-              <TouchableOpacity
-                key={index}
-                onPress={handleImagePick}
-                style={styles.addImageCard}
-              >
-                <Text style={styles.addText}>+</Text>
-              </TouchableOpacity>
-            );
-          }
-        })}
-      </View>
+              );
+            }
+          })}
+        </View>
 
       <View style={styles.formContainer}>
         <View style={styles.sectionContainer}>

@@ -21,6 +21,48 @@ const ProfileScreen = () => {
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const navigation = useNavigation();
+  const getIconName = (field) => {
+    switch (field) {
+      case "occupation":
+        return "briefcase";
+      case "location":
+        return "map-marker-alt";
+      case "qualification":
+        return "graduation-cap";
+      case "height":
+        return "ruler-vertical";
+      case "lookingFor":
+        return "search";
+      case "relationshipPreference":
+        return "heart";
+      case "zodiacSign":
+        return "star";
+      case "sexualOrientation":
+        return "transgender-alt";
+      case "gender":
+        return "user";
+      case "hobbies":
+        return "palette";
+      case "interests":
+        return "lightbulb";
+      case "aboutMe":
+        return "user-circle";
+      case "pet":
+        return "paw";
+      case "drinking":
+        return "wine-glass-alt";
+      case "smoking":
+        return "smoking";
+      case "workout":
+        return "dumbbell";
+      case "sleepingHabits":
+        return "bed";
+      case "familyPlans":
+        return "home";
+      default:
+        return "question"; // Default icon
+    }
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -57,10 +99,13 @@ const ProfileScreen = () => {
 
   const fixImageUrl = (url) => {
     if (!url) return "https://via.placeholder.com/400"; // Default placeholder image
-    if (!url.startsWith("http")) {
-      return `http://192.168.0.101:5050/${url}`;
+    if (url.startsWith("file:///")) {
+      return url; // Return local file URI as is
     }
-    return url;
+    if (!url.startsWith("http")) {
+      return `http://192.168.0.101:5050/${url}`; // Prefix server-relative URI
+    }
+    return url; // Return absolute HTTP URL as is
   };
 
   if (loading)
@@ -77,7 +122,9 @@ const ProfileScreen = () => {
           {/* Image Section */}
           <View style={styles.imageContainer}>
           <View style={styles.imageIndicatorContainer}>
+            
               {user?.profilePictures?.map((_, idx) => (
+                
                 <View
                   key={idx}
                   style={[
@@ -108,35 +155,34 @@ const ProfileScreen = () => {
                 )}
               </>
             )}
-          </View>
+            <View style={styles.profileInfoGradient}>
+                                  <LinearGradient
+                                    colors={["rgba(0,0,0,1)", "rgba(0,0,0,0.65)", "transparent"]}
+                                    start={{ x: 0.5, y: 1 }}
+                                    end={{ x: 0.5, y: 0 }}
+                                    style={styles.profileInfoGradientContent}
+                                  >
+                                    <Text style={styles.userNameAge}>
+                                      {user?.name}, {new Date().getFullYear() - new Date(user?.age).getFullYear()}
+                                    </Text>
+                                  </LinearGradient>
+                                </View>
+            </View>
 
-          {/* User Info */}
-          <View style={styles.infoContainer}>
-            <Text style={styles.name}>{user?.name}</Text>
-            <Text style={styles.age}>
-              {user?.age ? new Date().getFullYear() - new Date(user.age).getFullYear() : "N/A"} years old
-            </Text>
-
-            {/* About Me Section */}
-            {user?.aboutMe && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>About Me</Text>
-                <Text style={styles.sectionContent}>{user.aboutMe}</Text>
-              </View>
-            )}
-
-            {/* Dynamic Fields */}
-            {["occupation", "location", "qualification", "lookingFor", "relationshipPreference", "height", "zodiacSign", "sexualOrientation", "gender"].map(
+            {/* User Info */}
+            <View style={styles.sectionContainer}>
+              
+            {["lookingFor", "relationshipPreference",].map(
               (field, idx) =>
                 user?.[field] && (
                   <View key={idx} style={styles.section}>
-                    <Text style={styles.sectionTitle}>
-                    {field
-                        .replace(/([A-Z])/g, " $1")
-                        .trim()
-                        .replace(/^./, (char) => char.toUpperCase())}
-                    </Text>
-                    <View style={styles.chipContainer}>
+                    <View style={styles.iconTitleContainer}>
+                      <Icon name={getIconName(field)} size={20} color="#c64d76" />
+                      <Text style={styles.sectionTitle}>
+                        {field.replace(/([A-Z])/g, " $1").trim().replace(/^./, (char) => char.toUpperCase())}
+                      </Text>
+                    </View>
+                    <View style={styles.chipContainer1}>
                       <LinearGradient
                         colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
                         style={styles.gradientContainer}
@@ -149,13 +195,54 @@ const ProfileScreen = () => {
                   </View>
                 )
             )}
+            </View>
+            <View style={styles.sectionContainer}>
+              {/* About Me Section */}
+              {user?.aboutMe && (
+                <View style={styles.section}>
+                <View style={styles.iconTitleContainer}>
+                  <Icon name={getIconName("aboutMe")} size={20} color="#c64d76" />
+                  <Text style={styles.sectionTitle}>About Me</Text>
+                </View>
+              <Text style={styles.sectionContent}>{user.aboutMe}</Text>
+              </View>
+              )}
+            </View>
 
+            <View style={styles.sectionContainer}>
+               <Text style={styles.sectionTitle}>Basic Info</Text>
+               <View style={styles.horizontalLine} />
+            {/* Dynamic Fields */}
+            {["occupation", "location", "height","sexualOrientation", "gender","zodiacSign"].map(
+              (field, idx, array) =>
+                user?.[field] && (
+                  <React.Fragment key={idx}>
+                    <View style={styles.section}>
+                      <View style={styles.iconTitleContainer}>
+                        <Icon name={getIconName(field)} size={20} color="#c64d76" />
+                      </View>
+                      <View style={styles.chipContainer}>
+                        <Text style={styles.chip}>{user[field]}</Text>
+                      </View>
+                    </View>
+                    {idx < array.length  && <View style={styles.horizontalLine} />}
+                  </React.Fragment>
+                )
+            )}
+            </View>
 
+            
+            
+            <View style={styles.sectionContainer}>
            {/* Hobbies */}
            {user?.hobbies?.length > 0 && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Hobbies</Text>
-                <View style={styles.chipContainer}>
+                <View style={styles.iconTitleContainer}>
+                      <Icon name={getIconName("hobbies")} size={20} color="#c64d76" />
+                      <Text style={styles.sectionTitle}>Hobbies</Text>
+                    </View>
+                    <View style={styles.horizontalLine} />
+                <View style={styles.chipContainer1}>
                   {user.hobbies.map((hobby, i) => (
                     <LinearGradient
                       key={i}
@@ -174,8 +261,12 @@ const ProfileScreen = () => {
             {/* Interests */}
             {user?.interests?.length > 0 && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Interests</Text>
-                <View style={styles.chipContainer}>
+                <View style={styles.iconTitleContainer}>
+                      <Icon name={getIconName("interests")} size={20} color="#c64d76" />
+                      <Text style={styles.sectionTitle}>Interests</Text>
+                    </View>
+                    <View style={styles.horizontalLine} />
+                <View style={styles.chipContainer1}>
                   {user.interests.map((interest, i) => (
                     <LinearGradient
                       key={i}
@@ -190,7 +281,28 @@ const ProfileScreen = () => {
                 </View>
               </View>
             )}
-          </View>
+            </View>
+
+            <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Life Style</Text>
+            <View style={styles.horizontalLine} />
+              {["pet", "drinking", "smoking", "workout", "sleepingHabits", "familyPlans"].map(
+                (field, idx, array) =>
+                  user?.[field] && (
+                    <React.Fragment key={idx}>
+                      <View style={styles.section}>
+                        <View style={styles.iconTitleContainer}>
+                          <Icon name={getIconName(field)} size={20} color="#c64d76" />
+                        </View>
+                        <View style={styles.chipContainer}>
+                          <Text style={styles.chip}>{user[field]}</Text>
+                        </View>
+                      </View>
+                      {idx < array.length  && <View style={styles.horizontalLine} />}
+                    </React.Fragment>
+                  )
+              )}
+            </View>
         </View>
       </ScrollView>
 
@@ -206,9 +318,9 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#121212" },
   scrollContainer: { paddingBottom: 80 },
-  profileContainer: { alignItems: "center", paddingTop: 20 },
+  profileContainer: { alignItems: "center", paddingTop: 20, },
   imageContainer: { position: "relative" },
-  profileImage: { width: 350, height: 450, borderRadius: 10 },
+  profileImage: { width: 350, height: 600, borderRadius: 10 },
   leftArrow: { position: "absolute",
     left: 10,
     padding: 10,
@@ -219,14 +331,55 @@ const styles = StyleSheet.create({
     padding: 10,
     height:700,
     width:200,},
-  infoContainer: { width: "97%", backgroundColor: "#000", padding: 15, borderRadius: 10, marginTop: 8 },
+  infoContainer: {marginTop: 10,
+    padding: 10,
+    backgroundColor: "#333",
+    borderRadius: 10,
+    width:350,
+    marginLeft:-10
+  },
+  profileInfoGradient: {
+    position: "absolute",
+    bottom: 0,
+    left: -5,
+    right: -5,
+    zIndex: 10,
+  },
+  profileInfoGradientContent: {
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    alignItems: "flex-start",
+    paddingBottom:50
+  },
+  userNameAge: {
+    color: "white",
+    fontSize: 25,
+    fontWeight: "bold",
+  },
   name: { fontSize: 24, fontWeight: "bold", color: "white", textAlign: "center" },
   age: { fontSize: 18, color: "#ccc", textAlign: "center", marginBottom: 10 },
-  section: { marginBottom: 10, backgroundColor: "#222", borderRadius: 5 },
-  sectionTitle: { fontSize: 18, fontWeight: "bold", color: "white", padding: 10 },
-  sectionContent: { fontSize: 16, color: "#bbb", color: "#b25776", padding: 10 },
-  chipContainer: { flexDirection: "row", flexWrap: "wrap", gap: 5, padding: 10 },
-  chip: { color: "white", padding: 8, borderRadius: 10 },
+  section: { marginBottom: 10, backgroundColor: "none", borderRadius: 5 },
+  sectionContainer: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#000",
+    borderRadius: 10,
+    width:350,
+  },
+  iconTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom:5,
+    left:10,
+    top:10
+  },
+  sectionTitle: { fontSize: 20, fontWeight: "bold", color: "white", padding: 10, textAlign:"center" },
+  sectionContent: { fontSize: 16, backgroundColor: "#333", color: "#b25776", padding: 20, borderRadius:25, minHeight:100},
+  chipContainer: { flexDirection: "row", flexWrap: "wrap", gap: 5, padding: 10, marginTop:-35, marginLeft:30, marginBottom:-10 },
+  chipContainer1: { flexDirection: "row", flexWrap: "wrap", gap: 5, padding: 10 },
+  chip: { color: "white", padding: 8, borderRadius: 10},
   editButton: { position: "absolute", bottom: 20, backgroundColor: "#b25776", flexDirection: "row", alignItems: "center", padding: 15, borderRadius: 30, alignSelf: "center" },
   editButtonText: { color: "white", marginLeft: 10, fontSize: 16 },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
@@ -254,6 +407,12 @@ const styles = StyleSheet.create({
   },
   activeImageIndicatorLine: {
     backgroundColor: "#b25776",
+  },
+  horizontalLine: {
+    height: 1,
+    backgroundColor: "#333",
+    width: "100%",
+    marginVertical: 2,    
   },
 });
 

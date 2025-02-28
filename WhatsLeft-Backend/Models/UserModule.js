@@ -27,7 +27,7 @@ const UserData = new mongoose.Schema(
     zodiacSign: { type: String, required: false },
     sexualOrientation: { type: String, required: false },
     familyPlans: { type: String, required: false },
-    pets: { type: String, required: false },
+    pet: { type: String, required: false },
     drinking: { type: String, required: false },
     smoking: { type: String, required: false },
     workout: { type: String, required: false },

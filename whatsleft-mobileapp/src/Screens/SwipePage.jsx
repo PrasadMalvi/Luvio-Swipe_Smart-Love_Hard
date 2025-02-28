@@ -152,19 +152,10 @@ const SwipePage = () => {
                       </LinearGradient>
                     </View>
                   </View>
+                  
                   <View style={styles.profileDetailsContainer}>
-                    {users[index]?.aboutMe && (
-                      <View style={styles.sectionContainer}>
-                      <View style={styles.iconTitleContainer}>
-                        <Icon name="account-heart" size={20} color="#c64d76" />
-                        <Text style={styles.sectionTitle}>About Me</Text>
-                      </View>
-                      <Text style={styles.sectionText}>{users[index].aboutMe}</Text>
-                    </View>
-                    
-                    )}
 
-                    {users[index]?.relationshipPreference && (
+                  {users[index]?.relationshipPreference && (
                       <View style={styles.sectionContainer}>
                         <View style={styles.iconTitleContainer}>
                         <Icon name="heart-multiple" size={20} color="#c64d76" />
@@ -187,6 +178,38 @@ const SwipePage = () => {
                       </View>
                     )}
 
+                    {users[index]?.aboutMe && (
+                      <View style={styles.sectionContainer}>
+                      <View style={styles.iconTitleContainer}>
+                        <Icon name="account-heart" size={20} color="#c64d76" />
+                        <Text style={styles.sectionTitle}>About Me</Text>
+                      </View>
+                      <Text style={styles.sectionText}>{users[index].aboutMe}</Text>
+                    </View>
+                    
+                    )}
+                    {users[index]?.lookingFor && (
+                      <View style={styles.sectionContainer}>
+                        <View style={styles.iconTitleContainer}>
+                          <Icon name="account-search" size={20} color="#c64d76" />
+                          <Text style={styles.sectionTitle}>Looking For</Text>
+                        </View>
+                        <View style={styles.preferenceChipsContainer}>
+                          <View style={styles.preferenceChip}>
+                          <LinearGradient
+                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
+                            style={styles.gradientContainer}
+                            start={{ x: 0, y: 0.5 }}
+                            end={{ x: 1, y: 0.5 }}
+                          >
+                            <Text style={styles.preferenceChipText}>{users[index].lookingFor}</Text>
+                            </ LinearGradient >
+                          </View>
+                        </View>
+                      </View>
+                    )}
+                    
+
                     {users[index]?.qualification && (
                       <View style={styles.sectionContainer}>
                         <View style={styles.iconTitleContainer}>
@@ -208,26 +231,7 @@ const SwipePage = () => {
                       </View>
                     )}
 
-                    {users[index]?.lookingFor && (
-                      <View style={styles.sectionContainer}>
-                        <View style={styles.iconTitleContainer}>
-        <Icon name="account-search" size={20} color="#c64d76" />
-        <Text style={styles.sectionTitle}>Looking For</Text>
-      </View>
-                        <View style={styles.preferenceChipsContainer}>
-                          <View style={styles.preferenceChip}>
-                          <LinearGradient
-                            colors={['#c64d76', 'rgba(178, 87, 118, 0.5)', '#111']}
-                            style={styles.gradientContainer}
-                            start={{ x: 0, y: 0.5 }}
-                            end={{ x: 1, y: 0.5 }}
-                          >
-                            <Text style={styles.preferenceChipText}>{users[index].lookingFor}</Text>
-                            </ LinearGradient >
-                          </View>
-                        </View>
-                      </View>
-                    )}
+
 
                     {users[index]?.hobbies?.length > 0 && (
                       <View style={styles.sectionContainer}>
