@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, Image } from 'react-native';
 import LoadingProfilesScreen from './LoadingProfilesScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axiosInstance from '../../Redux/slices/axiosSlice'; // Adjust the path
+import axiosInstance, { setAuthToken } from '../../Redux/slices/axiosSlice'; // Adjust the path
 
 const { width, height } = Dimensions.get('window');
 
 
 const NoProfiles = () => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('Loading more profiles...');
   const [userProfilePic, setUserProfilePic] = useState(null);
 
@@ -16,6 +16,7 @@ const NoProfiles = () => {
     const fetchUser = async () => {
       try {
         const token = await AsyncStorage.getItem('authToken');
+        setAuthToken(token);
         const res = await axiosInstance.get('/Authentication/getUser', {
           headers: { Authorization: `Bearer ${token}` },
         });

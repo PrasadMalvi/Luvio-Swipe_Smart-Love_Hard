@@ -3,7 +3,6 @@ const UserData = require("../Models/UserModule");
 
 const authenticate = async (req, res, next) => {
   const token = req.header("Authorization")?.split(" ")[1];
-
   if (!token) {
     return res.status(401).json({ success: false, message: "Access Denied" });
   }
@@ -20,6 +19,7 @@ const authenticate = async (req, res, next) => {
 
     next();
   } catch (error) {
+    console.log("Authentication Error:", error);
     res.status(401).json({ success: false, message: "Invalid Token" });
   }
 };

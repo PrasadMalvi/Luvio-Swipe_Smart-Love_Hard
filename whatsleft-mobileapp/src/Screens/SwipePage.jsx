@@ -4,14 +4,17 @@ import {
   Text,
   Image,
   TouchableOpacity,
-  ActivityIndicator,
   ScrollView,
   Dimensions,
   StyleSheet,
+  Alert,
 } from "react-native";
-import { useDispatch } from "react-redux";
-import axios from "axios";
-import { likeUser, dislikeUser } from "../Redux/slices/matchSlice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  likeUser,
+  dislikeUser,
+  superLikeUser,
+} from "../Redux/slices/matchSlice";
 import {
   GestureHandlerRootView,
   PanGestureHandler,
@@ -20,24 +23,32 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
-import axiosInstance from "../Redux/slices/axiosSlice";
+import axiosInstance, { setAuthToken } from "../Redux/slices/axiosSlice";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import Icon6 from "react-native-vector-icons/FontAwesome6";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import SwipePageSkeletonLoader from "../Components/Skeleton/SwipePageSkeletonLoader";
-import NoProfiles from "../Components/Swipe/ProfileCard";
+import NoProfiles from "../Components/Swipe/NoProfileCard";
 import LoadingProfilesScreen from "../Components/Swipe/LoadingProfilesScreen";
+import io from "socket.io-client";
+import MatchedCard from "../Components/Swipe/MatchedCard";
 
 const { width, height } = Dimensions.get("window");
 
-const SwipePage = () => {
+const SwipePage = ({ navigation }) => {
   const [users, setUsers] = useState([]);
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [noProfilesLoading, setNoProfilesLoading] = useState(false);
   const [userProfilePic, setUserProfilePic] = useState(null);
+  const [previousIndexes, setPreviousIndexes] = useState([]);
+  const [socket, setSocket] = useState(null);
   const dispatch = useDispatch();
+  const loggedInUserId = useSelector((state) => state.auth.user?._id);
+  const [matchedUser, setMatchedUser] = useState(null);
+  const [showProfileDetails, setShowProfileDetails] = useState(null);
+  const baseUrl = "http://192.168.0.101:5050/";
   const getIconName = (field) => {
     switch (field) {
       case "occupation":
@@ -77,20 +88,36 @@ const SwipePage = () => {
       case "familyPlans":
         return "home";
       default:
-        return "question"; // Default icon
+        return "question";
     }
   };
-
+  let fetchUsers;
   useEffect(() => {
-    const fetchUsers = async () => {
+    fetchUsers = async () => {
       try {
         setLoading(true);
         const token = await AsyncStorage.getItem("authToken");
+        setAuthToken(token);
         const response = await axiosInstance.get("/Swipe/getUsers", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (response.data.success) {
-          setUsers(response.data.users);
+        const swipeDataResponse = await axiosInstance.get("/Swipe/getSwipeData", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.data.success && swipeDataResponse.data.success) {
+          const liked = swipeDataResponse.data.swipeData.likedUsers;
+          const disliked = swipeDataResponse.data.swipeData.dislikedUsers;
+          const superLiked = swipeDataResponse.data.swipeData.superLikedUsers;
+
+          const filteredUsers = response.data.users.filter((user) => {
+            return (
+              !liked.includes(user._id) &&
+              !disliked.includes(user._id) &&
+              !superLiked.includes(user._id)
+            );
+          });
+
+          setUsers(filteredUsers);
         }
       } catch (error) {
         console.error("Fetch users error:", error);
@@ -99,12 +126,13 @@ const SwipePage = () => {
       }
     };
     fetchUsers();
-    fetchUserProfilePic(); // Fetch user profile picture
+    fetchUserProfilePic();
   }, []);
 
   const fetchUserProfilePic = async () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
+      setAuthToken(token);
       const res = await axiosInstance.get("/Authentication/getUser", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -114,7 +142,11 @@ const SwipePage = () => {
         res.data.user.profilePictures &&
         res.data.user.profilePictures.length > 0
       ) {
-        setUserProfilePic(res.data.user.profilePictures[0]);
+        let profilePicUrl = res.data.user.profilePictures[0];
+        // Replace backslashes and add base URL
+        profilePicUrl = baseUrl + profilePicUrl.replace(/\\/g, "/");
+
+        setUserProfilePic(profilePicUrl);
       }
     } catch (error) {
       console.error("Error fetching user profile pic:", error);
@@ -126,25 +158,190 @@ const SwipePage = () => {
       setNoProfilesLoading(true);
       setTimeout(() => {
         setNoProfilesLoading(false);
-        setIndex(index + 1); // Increment index after loading
+        setIndex(index + 1);
       }, 3000);
     }
   }, [index, users.length, noProfilesLoading]);
 
-    const handleSwipe = (direction) => {
-        if (users[index]) {
-            direction === "like"
-                ? dispatch(likeUser(users[index]))
-                : dispatch(dislikeUser(users[index]));
-        }
+  const fetchMatchedUserDetails = async (matchedUserId) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      const response = await axiosInstance.get(
+        `/Authentication/getUserById/${matchedUserId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-        if (index < users.length - 1) {
+      if (response.data && response.data.user) {
+        const matchedUser = response.data.user;
+        Alert.alert("Congrats You matched....!");
+      } else {
+        console.log("Error fetching matched user details from user details API");
+      }
+    } catch (error) {
+      console.error(
+        "Error fetching matched user details from user details API:",
+        error
+      );
+    }
+  };
+  useEffect(() => {
+    if (loggedInUserId) {
+      const newSocket = io(axiosInstance);
+      setSocket(newSocket);
+
+      newSocket.on("match", (match) => {
+        if (match.user1 === loggedInUserId || match.user2 === loggedInUserId) {
+          Alert.alert(
+            "It's a Match!",
+            `You matched with ${
+              match.user1 === loggedInUserId ? match.user2 : match.user1
+            }`
+          );
+        }
+      });
+
+      return () => {
+        newSocket.off("match");
+        newSocket.disconnect();
+      };
+    }
+  }, [loggedInUserId]);
+
+  const handleSwipe = async (direction) => {
+    if (users[index]) {
+      const targetUserId = users[index]._id;
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+        let response;
+
+        switch (direction) {
+          case "like":
+            response = await axiosInstance.post(
+              "/Swipe/like",
+              { likedUserId: targetUserId },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.data.success) {
+              dispatch(likeUser(users[index]));
+              const responseMatch = await axiosInstance.post(
+                "/Swipe/match",
+                { matchedUserId: targetUserId },
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              if (
+                responseMatch.data.success &&
+                responseMatch.data.message === "It's a match!"
+              ) {
+                const matchedUserData = users.find(
+                  (user) => user._id === targetUserId
+                );
+                setMatchedUser(matchedUserData);
+              }
+            }
+            break;
+          case "superlike":
+            response = await axiosInstance.post(
+              "/Swipe/superlike",
+              { superLikedUserId: targetUserId },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.data.success) {
+              dispatch(superLikeUser(users[index]));
+              const matchResponse = await axiosInstance.post(
+                "/Swipe/match",
+                { matchedUserId: targetUserId },
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              if (
+                responseMatch.data.success &&
+                responseMatch.data.message === "It's a match!"
+              ) {
+                const matchedUserData = users.find(
+                  (user) => user._id === targetUserId
+                );
+                setMatchedUser(matchedUserData);
+              }
+            }
+            break;
+          case "dislike":
+            response = await axiosInstance.post(
+              "/Swipe/dislike",
+              { dislikedUserId: targetUserId },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.data.success) {
+              dispatch(dislikeUser(users[index]));
+            }
+            break;
+          case "block":
+            response = await axiosInstance.post(
+              "/Swipe/block",
+              { blockedUserId: targetUserId },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.data.success) {
+              Alert.alert("User Blocked");
+              fetchUsers();
+            }
+            break;
+          case "report":
+            Alert.prompt(
+              "Report User",
+              "Enter report reason:",
+              async (reason) => {
+                if (reason) {
+                  const reportResponse = await axiosInstance.post(
+                    "/Swipe/report",
+                    { reportedUserId: targetUserId, reason: reason },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                  );
+                  if (reportResponse.data.success) {
+                    Alert.alert("User Reported");
+                  }
+                }
+              },
+              "plain-text"
+            );
+            break;
+          default:
+            break;
+        }
+        if (direction !== "report" && direction !== "block") {
+          if (index < users.length - 1) {
+            setPreviousIndexes((prev) => [...prev, index]);
             setIndex(index + 1);
             setCurrentImageIndex(0);
-        } else {
-            // Last profile swiped, we will increment index after the loading is done.
+          }
         }
-    };
+      } catch (error) {
+        console.error("Swipe action error:", error);
+        Alert.alert("Error", "An error occurred during the action.");
+      }
+    }
+  };
+  const closeMatchCard = () => {
+    setMatchedUser(null);
+  };
+  const startConversation = () => {
+    console.log("Start conversation");
+    closeMatchCard();
+  };
+
+  const handleProfilePress = (profileType) => {
+    if (profileType === "myProfile") {
+      setShowProfileDetails("myProfile");
+    } else if (profileType === "matchedProfile") {
+      setShowProfileDetails("matchedProfile");
+    }
+  };
+  const handleGoBack = () => {
+    if (previousIndexes.length > 0) {
+      const prevIndex = previousIndexes[previousIndexes.length - 1];
+      setIndex(prevIndex);
+      setPreviousIndexes((prev) => prev.slice(0, prev.length - 1));
+      setCurrentImageIndex(0);
+    }
+  };
 
   const handleNextImage = () => {
     if (users[index]?.profilePictures?.length > currentImageIndex + 1) {
@@ -162,18 +359,28 @@ const SwipePage = () => {
     return <SwipePageSkeletonLoader />;
   }
   const fixImageUrl = (url) => {
-    if (!url) return "https://via.placeholder.com/400"; // Default placeholder image
+    if (!url) return "https://via.placeholder.com/400";
     if (url.startsWith("file:///")) {
-      return url; // Return local file URI as is
+      return url;
     }
     if (!url.startsWith("http")) {
-      return `http://192.168.0.101:5050/${url}`; // Prefix server-relative URI
+      return `http://192.168.0.101:5050/${url}`;
     }
-    return url; // Return absolute HTTP URL as is
+    return url;
   };
 
   return (
     <View style={styles.container}>
+      {matchedUser && (
+      <MatchedCard
+        myProfilePic={userProfilePic}
+        matchedUserProfilePic={matchedUser.profilePictures[0]}
+        onProfilePress={handleProfilePress}
+        onClose={closeMatchCard}
+        onConversationStart={startConversation}
+        matchedUser={matchedUser}
+      />
+    )}
       <ScrollView>
         <GestureHandlerRootView style={styles.gestureRootView}>
           <PanGestureHandler
@@ -189,7 +396,7 @@ const SwipePage = () => {
               contentContainerStyle={styles.contentContainer}
               showsVerticalScrollIndicator={false}
             >
-              {noProfilesLoading ? (
+              {noProfilesLoading ? (  
                 <LoadingProfilesScreen userProfilePic={userProfilePic} message="Loading more profiles..." />
               ) : users.length > 0 && users[index] ? (
                 <>
@@ -384,7 +591,21 @@ const SwipePage = () => {
                                     )
                                 )}
                               </View>
-                              
+                              <View style={styles.cautionImp}>
+                              <TouchableOpacity
+                                  onPress={() => handleSwipe("block")}
+                                  style={styles.cautionButton}
+                                >
+                                  <Text style={styles.cautionText}>Block {users[index]?.name}</Text>
+                                </TouchableOpacity>
+                              <TouchableOpacity
+                                  onPress={() => handleSwipe("report")}
+                                  style={styles.cautionButton}
+                                >
+                                  <Text style={styles.cautionText}>Report {users[index]?.name}</Text>
+                                </TouchableOpacity>
+                                
+                              </View>
                
               </>
             ) : (
@@ -395,21 +616,33 @@ const SwipePage = () => {
       </GestureHandlerRootView>
     </ScrollView>
     <View style={styles.swipeButtonsContainer}>
-  <TouchableOpacity onPress={() => handleSwipe("goback")} style={styles.goBackButton}>
-    <FontAwesome name="rotate-left" size={19} color="yellow" />
-  </TouchableOpacity>
-  <TouchableOpacity onPress={() => handleSwipe("dislike")} style={styles.dislikeButton}>
-    <FontAwesome name="times" size={25} color="red" />
-  </TouchableOpacity>
-  <TouchableOpacity onPress={() => handleSwipe("superlike")} style={styles.superLike}>
-    <Icon6 name="heart-circle-bolt" size={30} color="#a594f9" />
-  </TouchableOpacity>
-  <TouchableOpacity onPress={() => handleSwipe("like")} style={styles.likeButton}>
-    <FontAwesome name="heart" size={25} color="#b25776" />
-  </TouchableOpacity>
-  <TouchableOpacity onPress={() => handleSwipe("share")} style={styles.shareButton}>
-    <FontAwesome name="share-alt" size={19} color="#abc4ff" />
-  </TouchableOpacity>
+    <TouchableOpacity
+          onPress={() => handleGoBack()}
+          style={styles.goBackButton}
+        >
+          <FontAwesome name="rotate-left" size={19} color="yellow" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => handleSwipe("dislike")}
+          style={styles.dislikeButton}
+        >
+          <FontAwesome name="times" size={25} color="red" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => handleSwipe("superlike")}
+          style={styles.superLike}
+        >
+          <Icon6 name="heart-circle-bolt" size={30} color="#a594f9" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => handleSwipe("like")}
+          style={styles.likeButton}
+        >
+          <FontAwesome name="heart" size={25} color="#b25776" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleSwipe("share")} style={styles.shareButton}>
+          <FontAwesome name="share-alt" size={19} color="#abc4ff" />
+         </TouchableOpacity>
   
 </View>
   </View>
@@ -420,6 +653,16 @@ const styles = StyleSheet.create({
 container: {
   flex: 1,
   backgroundColor: "#111",
+},
+profileDetailsContainer:{
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  justifyContent: 'center',
+  alignItems: 'center',
 },
 loadingIndicator: {
   marginTop: 50,
@@ -644,6 +887,27 @@ swipeButtonsContainer: {
     width: "100%",
     marginVertical: 2,    
   },
+  cautionImp:{
+    marginTop: 10,
+    padding: 30,
+    paddingLeft: 50,
+    backgroundColor: "#000",
+    borderRadius: 10,
+    width:350,
+  },
+  cautionButton:{
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#222",
+    borderRadius: 20,
+    width:250,
+    height:50,
+  },
+  cautionText:{
+    fontSize:20,
+    textAlign:"center",
+    color:"red"
+  }
 });
 
 export default SwipePage;

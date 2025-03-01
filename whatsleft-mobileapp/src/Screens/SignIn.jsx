@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axiosInstance from "../Redux/slices/axiosSlice";
+import axiosInstance, { setAuthToken } from "../Redux/slices/axiosSlice";
 
 const SignIn = ({ navigation }) => {
   const [loginType, setLoginType] = useState("email"); // "email" or "mobile"
@@ -37,6 +37,7 @@ const handleEmailLogin = async () => {
     if (response.data.success) {
       const token = response.data.token; // Get JWT Token
       await AsyncStorage.setItem("authToken", token); // Store token
+      setAuthToken(token);
       navigation.navigate("MainApp");
     } else {
       Alert.alert("Error", response.data.message);
@@ -93,6 +94,7 @@ const handleEmailLogin = async () => {
         const token = response.data.token;
         await AsyncStorage.setItem("authToken", token);
         Alert.alert("Success", "OTP Verified!");
+        setAuthToken(token);
         navigation.navigate("MainApp"); // Navigate to Home on successful OTP verification
       } else {
         Alert.alert("Error", response.data.message);

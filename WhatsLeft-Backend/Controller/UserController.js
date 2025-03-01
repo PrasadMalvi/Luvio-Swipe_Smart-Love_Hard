@@ -4,11 +4,12 @@ const JWT = require("jsonwebtoken");
 const otpService = require("../Utils/OtpService");
 const fs = require("fs");
 const path = require("path");
+const { io } = require("../Server");
 
 // Sign-Up Controller
 const signUpController = async (req, res) => {
   try {
-    console.log("Received Request:", req.body, req.files); // Debugging
+    console.log("Received Request:", req.body, req.files);
 
     const {
       name,
@@ -159,6 +160,21 @@ const signUpController = async (req, res) => {
     });
 
     await newUser.save();
+
+    io.emit("newUser", {
+      id: newUser._id,
+      name: newUser.name,
+      email: newUser.email,
+      profilePictures: newUser.profilePictures,
+      age: newUser.age,
+      location: newUser.location,
+      occupation: newUser.occupation,
+      aboutMe: newUser.aboutMe,
+      interests: newUser.interests,
+      hobbies: newUser.hobbies,
+      relationshipPreference: newUser.relationshipPreference,
+      lookingFor: newUser.lookingFor,
+    });
 
     // Generate JWT
     const token = JWT.sign({ id: newUser._id }, process.env.JWT_SECRET, {
@@ -452,6 +468,24 @@ const removeProfileImageController = async (req, res) => {
   }
 };
 
+const getUserById = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await UserData.findById(userId); // Assuming you're using Mongoose
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
 module.exports = {
   signUpController,
   signInController,
@@ -460,4 +494,5 @@ module.exports = {
   getUserDetails,
   updateProfileController,
   removeProfileImageController,
+  getUserById,
 };

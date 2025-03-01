@@ -7,8 +7,9 @@ const {
   getUserDetails,
   updateProfileController,
   removeProfileImageController,
+  getUserById,
 } = require("../Controller/UserController");
-
+const { io } = require("../Server.js");
 const authenticate = require("../Middleware/authMiddleware.js");
 
 const router = express.Router();
@@ -17,7 +18,7 @@ const multer = require("multer");
 // Configure Multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/"); // Ensure this folder exists
+    cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + "-" + file.originalname);
@@ -26,7 +27,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post("/signUp", upload.array("profileImage", 5), signUpController);
+router.post("/signUp", upload.array("profileImage", 5), (req, res) =>
+  signUpController(req, res, io)
+);
 router.post("/signIn", signInController);
 router.post("/send-otp", sendOtpController);
 router.post("/verifyOtp", verifyOtpController);
@@ -42,5 +45,6 @@ router.delete(
   authenticate,
   removeProfileImageController
 );
+router.get("/getUserById/:userId", authenticate, getUserById);
 
 module.exports = router;
