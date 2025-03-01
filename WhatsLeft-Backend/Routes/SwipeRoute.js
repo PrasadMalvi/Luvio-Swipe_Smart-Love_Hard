@@ -10,6 +10,7 @@ const {
   unmatchUser,
   getSwipeData,
   getMatchDetails,
+  getMatchedUsers,
 } = require("../Controller/SwipeController.js");
 const authenticate = require("../Middleware/authMiddleware.js");
 
@@ -25,5 +26,6 @@ router.post("/report", authenticate, reportUser);
 router.post("/match", authenticate, matchUser);
 router.post("/unmatch", authenticate, unmatchUser);
 router.get("/match/:matchedUserId", authenticate, getMatchDetails);
+router.get("/getMatchedUsers", authenticate, getMatchedUsers);
 
 module.exports = router;

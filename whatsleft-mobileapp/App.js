@@ -13,6 +13,9 @@ import ProfilePage from "./src/Screens/ProfilePage";
 import SettingsPage from "./src/Screens/SettingsPage";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import EditProfile from "./src/Screens/EditProfile";
+import MyChats from "./src/Screens/MyChats";
+import ExplorePage from "./src/Screens/ExplorePage";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -23,22 +26,31 @@ function BottomTabs() {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
           let iconName;
+          let IconComponent = FontAwesome5; // Default Icon Component.
           if (route.name === "Swipe") iconName = "fire";
           else if (route.name === "Chats") iconName = "comment-alt";
           else if (route.name === "Profile") iconName = "user";
           else if (route.name === "Settings") iconName = "cog";
-          return <FontAwesome5 name={iconName} size={size} color={color} />;
+          else if (route.name === "Explore") {
+            iconName = "near-me";
+            IconComponent = MaterialIcons;
+          }
+          return <IconComponent name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: "#b25776",
         tabBarInactiveTintColor: "gray",
-        tabBarStyle: { backgroundColor: "black", paddingTop: 5, height: 60 },
-
-        // ✅ Customize header design
+        tabBarStyle: {
+          backgroundColor: "black",
+          paddingTop: 5,
+          height: 60,
+          borderTopWidth: 0.17,
+        },
+        tabBarHideOnKeyboard: true,
         headerStyle: {
-          backgroundColor: "#1a1a1a", // Change header background color
+          backgroundColor: "#1a1a1a",
           height: 80,
         },
-        headerTintColor: "#b25776", // Change text/icon color
+        headerTintColor: "#b25776",
         headerTitleStyle: {
           marginBottom: 10,
           fontSize: 25,
@@ -52,9 +64,14 @@ function BottomTabs() {
         options={{ title: "WhatsLeft" }} // ✅ Custom header title
       />
       <Tab.Screen
+        name="Explore"
+        component={ExplorePage}
+        options={{ title: "Explore" }} // ✅ Custom header title
+      />
+      <Tab.Screen
         name="Chats"
         component={ChatsPage}
-        options={{ title: "Conversations" }} // ✅ Custom header title
+        options={{ title: "Messages" }} // ✅ Custom header title
       />
       <Tab.Screen
         name="Profile"
@@ -64,7 +81,7 @@ function BottomTabs() {
       <Tab.Screen
         name="Settings"
         component={SettingsPage}
-        options={{ title: "Preferences" }} // ✅ Custom header title
+        options={{ title: "Settings" }} // ✅ Custom header title
       />
     </Tab.Navigator>
   );
@@ -103,6 +120,11 @@ export default function App() {
           <Stack.Screen
             name="EditProfile"
             component={EditProfile}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="MyChats"
+            component={MyChats}
             options={{ headerShown: false }}
           />
         </Stack.Navigator>

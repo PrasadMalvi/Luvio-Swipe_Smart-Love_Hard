@@ -361,6 +361,35 @@ const getMatchDetails = async (req, res) => {
   }
 };
 
+// In your SwipeController.js
+
+const getMatchedUsers = async (req, res) => {
+  try {
+    const loggedInUserId = req.user.id;
+
+    // Fetch matched users (both user1 and user2 fields)
+    const matches = await Match.find({
+      $or: [{ user1: loggedInUserId }, { user2: loggedInUserId }],
+    });
+
+    const matchedUserIds = matches.flatMap((match) =>
+      match.user1.toString() === loggedInUserId ? match.user2 : match.user1
+    );
+
+    // Fetch user data for matched users
+    const matchedUsers = await UserData.find({
+      _id: { $in: matchedUserIds },
+    }).select(
+      "name age location interests profilePictures occupation relationshipPreference lookingFor hobbies aboutMe height qualification zodiacSign sexualOrientation familyPlans pet drinking smoking workout sleepingHabits gender"
+    );
+
+    res.status(200).json({ success: true, matchedUsers: matchedUsers });
+  } catch (error) {
+    console.error("getMatchedUsers Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   getUsers,
   getSwipeData,
@@ -372,4 +401,5 @@ module.exports = {
   matchUser,
   unmatchUser,
   getMatchDetails,
+  getMatchedUsers,
 };
