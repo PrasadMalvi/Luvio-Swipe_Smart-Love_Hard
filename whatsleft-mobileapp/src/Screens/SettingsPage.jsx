@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Switch, TextInput, Modal, Alert, ScrollView } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import axiosInstance from "../Redux/slices/axiosSlice";
 
 const SettingsScreen = ({ navigation }) => {
   const [user, setUser] = useState({ email: "", notifications: true, privacy: "Everyone" });
@@ -12,7 +13,7 @@ const SettingsScreen = ({ navigation }) => {
     const fetchUserSettings = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
-        const res = await axios.get("http://192.168.0.101:5050/Authentication/getUser", {
+        const res = await axiosInstance.get("/Authentication/getUser", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -37,8 +38,8 @@ const SettingsScreen = ({ navigation }) => {
 
     try {
       const token = await AsyncStorage.getItem("authToken");
-      await axios.put(
-        "http://192.168.0.101:5050/Authentication/updateSettings",
+      await axiosInstance.put(
+        "/Authentication/updateSettings",
         { notifications: updatedNotifications },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -52,8 +53,8 @@ const SettingsScreen = ({ navigation }) => {
 
     try {
       const token = await AsyncStorage.getItem("authToken");
-      await axios.put(
-        "http://192.168.0.101:5050/Authentication/changePassword",
+      await axiosInstance.put(
+        "/Authentication/changePassword",
         { newPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -74,7 +75,7 @@ const SettingsScreen = ({ navigation }) => {
         onPress: async () => {
           try {
             const token = await AsyncStorage.getItem("authToken");
-            await axios.delete("http://192.168.0.101:5050/Authentication/deleteAccount", {
+            await axiosInstance.delete("/Authentication/deleteAccount", {
               headers: { Authorization: `Bearer ${token}` },
             });
             await AsyncStorage.removeItem("authToken");

@@ -17,15 +17,16 @@ import { LinearGradient } from "expo-linear-gradient";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome from '@expo/vector-icons/FontAwesome5';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import EmptyChatSkeletonLoader from '../Components/Chats/EmptyChatSkeletonLoader';
 
-export default function ChatsPage({ navigation }) { // Receive navigation prop
+export default function ChatsPage({ navigation }) {
   const [searchText, setSearchText] = useState('');
   const [matchedWithoutConversation, setMatchedWithoutConversation] = useState([]);
   const [conversationHistory, setConversationHistory] = useState([]);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [showFilterOptions, setShowFilterOptions] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("Recent");
-
+  const [loading, setLoading] = useState(true);
   const filterOptions = ['Recent', 'Nearby', 'Unread'];
 
   const handleFilterClick = () => {
@@ -62,10 +63,33 @@ export default function ChatsPage({ navigation }) { // Receive navigation prop
       }
     } catch (error) {
       console.error('Error fetching matched users', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchConversationHistory = async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      setAuthToken(token);
+      const response = await axiosInstance.get('/Chat/getMyChats', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.data && response.data.success) {
+        setConversationHistory(response.data.chats);
+      } else {
+        console.error('Failed to fetch conversation history:', response.data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching conversation history', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const formatTime = (dateString) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -73,10 +97,45 @@ export default function ChatsPage({ navigation }) { // Receive navigation prop
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return date.toLocaleDateString(undefined, options);
   };
+  const fixImageUrl = (url) => {
+    if (!url) return "https://via.placeholder.com/400";
+    if (url.startsWith("file:///")) {
+      return url;
+    }
+    if (url.startsWith("uploads\\") || url.startsWith("uploads/")) {
+      return `http://192.168.0.100:5050/${url.replace(/\\/g, "/")}`;
+    }
+    return url;
+  };
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (conversationHistory.length === 0 && matchedWithoutConversation.length === 0) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.noChatsContainer}>
+          <Text style={styles.noChatsText}>No chats available.</Text>
+          <Text style={styles.noChatsText}>Start swiping and matching!</Text>
+          <TouchableOpacity
+            style={styles.goToSwipeButton}
+            onPress={() => navigation.navigate('Swipe')}
+          >
+            <Text style={styles.goToSwipeButtonText}>Go to Swipe Page</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -97,12 +156,13 @@ export default function ChatsPage({ navigation }) { // Receive navigation prop
         </View>
 
         {matchedWithoutConversation.map((user) => (
+          
           <TouchableOpacity
             key={user._id}
             style={styles.profileItem}
-            onPress={() => navigation.navigate('MyChats', { user })} // Navigate to MyChats
+            onPress={() => navigation.navigate('MyChats', { user: { ...user, matchedAt: user.matchedAt } })}
           >
-            <Image source={{ uri: user.profilePictures[0] }} style={styles.profilePic} />
+            <Image source={{ uri: fixImageUrl(user.profilePictures[0]) }} style={styles.profilePic} />
           </TouchableOpacity>
         ))}
         <View style={styles.dummyPicCard1}></View>
@@ -137,27 +197,34 @@ export default function ChatsPage({ navigation }) { // Receive navigation prop
           )}
         </View>
 
-        {conversationHistory.map((user) => (
-          <TouchableOpacity
-            key={user._id}
-            style={styles.conversationItem}
-            onPress={() => setSelectedProfile(user)}
-          >
-            <Image source={{ uri: user.profilePictures[0] }} style={styles.conversationPic} />
-            <View style={styles.conversationDetails}>
-              <Text style={styles.conversationName}>{user.name}</Text>
-              <Text style={styles.lastMessage}>{user.lastMessage}</Text>
-              <View style={styles.timeDateContainer}>
-                <Text style={styles.time}>{formatTime(user.lastSent)}</Text>
-                <Text style={styles.date}>{formatDate(user.lastSent)}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
+        {conversationHistory.length > 0 ? (
+          conversationHistory.map((chat) => {
+            const otherUser = chat.participants.find(participant => participant._id !== chat.lastMessage.sender);
+
+            return (
+              <TouchableOpacity
+                key={chat._id}
+                style={styles.conversationItem}
+                onPress={() => navigation.navigate('MyChats', { user: otherUser })}
+              >
+                <Image source={{ uri: otherUser.profilePictures[0] }} style={styles.conversationPic} />
+                <View style={styles.conversationDetails}>
+                  <Text style={styles.conversationName}>{otherUser.name}</Text>
+                  <Text style={styles.lastMessage}>{chat.lastMessage.content}</Text>
+                  <View style={styles.timeDateContainer}>
+                    <Text style={styles.time}>{formatTime(chat.lastMessage.createdAt)}</Text>
+                    <Text style={styles.date}>{formatDate(chat.lastMessage.createdAt)}</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            );
+          })
+        ) : (
+         <EmptyChatSkeletonLoader />
+        )}
       </ScrollView>
 
-      {selectedProfile && (
-        <ProfileCard user={selectedProfile} onClose={() => setSelectedProfile(null)} />
+      {selectedProfile && (<ProfileCard user={selectedProfile} onClose={() => setSelectedProfile(null)} />
       )}
     </SafeAreaView>
   );
@@ -317,5 +384,32 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 10,
     color: 'gray',
+  },
+  noChatsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noChatsText: {
+    color: '#fff',
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  goToSwipeButton: {
+    backgroundColor: '#b25776',
+    padding: 15,
+    borderRadius: 8,
+    marginTop: 20,
+  },
+  goToSwipeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: 20,
+    textAlign: 'center',
+    marginTop: '50%'
   },
 });

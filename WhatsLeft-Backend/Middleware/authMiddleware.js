@@ -9,7 +9,18 @@ const authenticate = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await UserData.findById(decoded.id).select("-password");
+
+    // Adjust this line to match your JWT payload
+    const userId = decoded.userId || decoded._id || decoded.id; // Try common names
+
+    if (!userId) {
+      console.log("No userId found in decoded token");
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid Token Payload" });
+    }
+
+    req.user = await UserData.findById(userId).select("-password");
 
     if (!req.user) {
       return res

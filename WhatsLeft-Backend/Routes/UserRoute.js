@@ -9,7 +9,7 @@ const {
   removeProfileImageController,
   getUserById,
 } = require("../Controller/UserController");
-const { io } = require("../Server.js");
+const socket = require("../Socket");
 const authenticate = require("../Middleware/authMiddleware.js");
 
 const router = express.Router();
@@ -26,7 +26,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-
+const io = socket.getIO();
 router.post("/signUp", upload.array("profileImage", 5), (req, res) =>
   signUpController(req, res, io)
 );

@@ -225,7 +225,7 @@ const EditProfile = () => {
                     source={{
                       uri: isLocalFile
                         ? imageUri
-                        : `http://192.168.0.101:5050/${imageUri}`,
+                        : `http://192.168.0.100:5050/${imageUri}`,
                     }}
                     style={styles.image}
                   />

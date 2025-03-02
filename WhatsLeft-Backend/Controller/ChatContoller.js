@@ -1,80 +1,80 @@
 const Message = require("../Models/MessageModule");
 const CallLog = require("../Models/CallLogModule");
 const Chat = require("../Models/ChatsModule");
-const { io } = require("../Server");
+const socket = require("../Socket");
+const jwt = require("jsonwebtoken");
 
 // 🟢 Send a message (text, image, or video)
 const sendMessage = async (req, res) => {
   try {
-    const { chatId, receiverId, content, mediaType } = req.body;
+    const { content, chatId } = req.body;
+    const { userId } = req.params;
     const senderId = req.user.id;
-    let mediaUrl = null;
 
-    if (req.file) {
-      mediaUrl = `/uploads/${req.file.filename}`;
-    }
+    console.log("sendMessage: content =", content);
+    console.log("sendMessage: chatId =", chatId);
+    console.log("sendMessage: userId =", userId);
+    console.log("sendMessage: senderId =", senderId);
 
-    if (senderId === receiverId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Cannot send message to yourself" });
-    }
-
-    let chat;
-    if (chatId) {
-      chat = await Chat.findById(chatId);
-    } else {
-      chat = await Chat.findOne({
-        participants: { $all: [senderId, receiverId] },
-      });
-    }
-
-    if (!chat) {
-      chat = new Chat({ participants: [senderId, receiverId] });
-      await chat.save();
-    }
-
-    const message = new Message({
-      chatId: chat._id,
+    const newMessage = new Message({
+      content: content,
+      chatId: chatId, // Ensure chatId is correctly set here
       sender: senderId,
-      content,
-      media: mediaUrl,
-      mediaType: mediaType || null,
     });
 
-    await message.save();
-    chat.lastMessage = message._id;
-    await chat.save();
+    await newMessage.save();
+    const io = socket.getIO();
+    console.log(`Emitting newMessage to room: ${chatId}`, newMessage);
+    io.to(chatId).emit("newMessage", newMessage);
 
-    io.to(receiverId).emit("newMessage", message);
-
-    res.status(200).json({ success: true, message });
+    setTimeout(() => {
+      io.to(chatId).emit("newMessage", newMessage);
+    }, 100);
+    res
+      .status(201)
+      .json({ message: "Message sent successfully", chatId: chatId });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error("Error sending message:", error);
+    res.status(500).json({ error: "Failed to send message" });
+  }
+};
+
+const getChat = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const senderId = req.user.id;
+
+    // Corrected query to use 'participants'
+    let chat = await Chat.findOne({
+      participants: { $all: [senderId, userId] },
+    });
+
+    if (!chat) {
+      return res.status(200).json({ messages: [], chatId: null });
+    }
+
+    // Corrected query to use 'chatId'
+    const messages = await Message.find({ chatId: chat._id });
+    res.status(200).json({ messages, chatId: chat._id });
+  } catch (error) {
+    console.error("Error getting chat:", error);
+    res.status(500).json({ error: "Failed to get chat" });
   }
 };
 
 const getMyChats = async (req, res) => {
   try {
     const userId = req.user.id;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    console.log("User ID:", userId);
 
-    const chats = await Chat.find({ participants: userId })
+    const chats = await Chat.find({ participants: { $in: [userId] } })
       .populate("participants", "name profilePictures")
       .populate("lastMessage")
-      .sort({ updatedAt: -1 })
-      .skip(skip)
-      .limit(limit);
+      .sort({ updatedAt: -1 });
 
-    const totalChats = await Chat.countDocuments({ participants: userId });
-    const totalPages = Math.ceil(totalChats / limit);
+    console.log("Chats fetched from database:", chats);
 
-    res
-      .status(200)
-      .json({ success: true, chats, totalPages, currentPage: page });
+    res.status(200).json({ success: true, chats });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Server error" });
@@ -107,6 +107,7 @@ const logCall = async (req, res) => {
 
     await callLog.save();
 
+    const io = socket.getIO(); // Get the initialized io object
     io.to(receiverId).emit("newCallLog", callLog);
 
     res.status(200).json({ success: true, callLog });
@@ -140,19 +141,6 @@ const getCallLogs = async (req, res) => {
     res
       .status(200)
       .json({ success: true, calls, totalPages, currentPage: page });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-};
-
-const getChat = async (req, res) => {
-  try {
-    const { chatId } = req.params;
-    const messages = await Message.find({ chatId: chatId })
-      .populate("sender", "name profilePictures")
-      .sort({ createdAt: 1 });
-    res.status(200).json({ success: true, messages });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Server error" });

@@ -108,7 +108,7 @@ const likeUser = async (req, res) => {
   try {
     const { likedUserId } = req.body;
     const loggedInUserId = req.user.id;
-
+    console.log("likeUser request:", req.body, "user:", req.user);
     let swipeData = await Swipe.findOne({ userId: loggedInUserId });
     if (!swipeData) {
       swipeData = new Swipe({ userId: loggedInUserId });
@@ -118,7 +118,7 @@ const likeUser = async (req, res) => {
       swipeData.likedUsers.push(likedUserId);
       await swipeData.save();
     }
-
+    console.log("likeUser success");
     return res
       .status(200)
       .json({ success: true, message: "User liked successfully" });
@@ -255,33 +255,18 @@ const reportUser = async (req, res) => {
 const matchUser = async (req, res) => {
   try {
     const { matchedUserId } = req.body;
-    const loggedInUserId = req.user.id;
+    const currentUserId = req.user._id;
 
-    const loggedInUserSwipe = await Swipe.findOne({ userId: loggedInUserId });
+    // Check if the matched user has also liked the current user
     const matchedUserSwipe = await Swipe.findOne({ userId: matchedUserId });
 
-    if (!loggedInUserSwipe || !matchedUserSwipe) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Swipe data not found" });
-    }
-
-    // Check for mutual likes or super likes
-    const loggedInUserLiked =
-      loggedInUserSwipe.likedUsers.includes(matchedUserId);
-    const loggedInUserSuperLiked =
-      loggedInUserSwipe.superLikedUsers.includes(matchedUserId);
-    const matchedUserLiked =
-      matchedUserSwipe.likedUsers.includes(loggedInUserId);
-    const matchedUserSuperLiked =
-      matchedUserSwipe.superLikedUsers.includes(loggedInUserId);
-
     if (
-      (loggedInUserLiked && (matchedUserLiked || matchedUserSuperLiked)) ||
-      (loggedInUserSuperLiked && (matchedUserLiked || matchedUserSuperLiked))
+      matchedUserSwipe &&
+      matchedUserSwipe.likedUsers.includes(currentUserId)
     ) {
+      // Both users have liked each other, create a match
       const newMatch = new Match({
-        user1: loggedInUserId,
+        user1: currentUserId,
         user2: matchedUserId,
       });
       await newMatch.save();
@@ -291,12 +276,15 @@ const matchUser = async (req, res) => {
         message: "It's a match!",
         matchId: newMatch._id,
       });
+    } else {
+      // The other user has not liked the current user, no match
+      return res.status(200).json({
+        success: true,
+        message: "Like recorded, but no match yet.",
+      });
     }
-
-    return res
-      .status(400)
-      .json({ success: false, message: "No mutual like or super like" });
   } catch (error) {
+    console.error("matchUser error:", error);
     return res.status(500).json({
       success: false,
       message: "Error matching user",
@@ -304,7 +292,6 @@ const matchUser = async (req, res) => {
     });
   }
 };
-
 /**
  * Unmatch a user
  */
@@ -331,8 +318,6 @@ const unmatchUser = async (req, res) => {
     });
   }
 };
-
-// In your SwipeController.js
 
 const getMatchDetails = async (req, res) => {
   try {
@@ -361,29 +346,36 @@ const getMatchDetails = async (req, res) => {
   }
 };
 
-// In your SwipeController.js
-
 const getMatchedUsers = async (req, res) => {
   try {
     const loggedInUserId = req.user.id;
 
-    // Fetch matched users (both user1 and user2 fields)
+    // Fetch matches
     const matches = await Match.find({
       $or: [{ user1: loggedInUserId }, { user2: loggedInUserId }],
     });
 
-    const matchedUserIds = matches.flatMap((match) =>
-      match.user1.toString() === loggedInUserId ? match.user2 : match.user1
+    // Extract matched user IDs and add matchedAt to each user
+    const matchedUsersWithMatchData = await Promise.all(
+      matches.map(async (match) => {
+        const matchedUserId =
+          match.user1.toString() === loggedInUserId ? match.user2 : match.user1;
+
+        // Fetch user data
+        const matchedUser = await UserData.findById(matchedUserId).select(
+          "name age location interests profilePictures occupation relationshipPreference lookingFor hobbies aboutMe height qualification zodiacSign sexualOrientation familyPlans pet drinking smoking workout sleepingHabits gender"
+        );
+
+        return {
+          ...matchedUser.toObject(),
+          matchedAt: match.matchedAt, // Add matchedAt from the Match document
+        };
+      })
     );
 
-    // Fetch user data for matched users
-    const matchedUsers = await UserData.find({
-      _id: { $in: matchedUserIds },
-    }).select(
-      "name age location interests profilePictures occupation relationshipPreference lookingFor hobbies aboutMe height qualification zodiacSign sexualOrientation familyPlans pet drinking smoking workout sleepingHabits gender"
-    );
-
-    res.status(200).json({ success: true, matchedUsers: matchedUsers });
+    res
+      .status(200)
+      .json({ success: true, matchedUsers: matchedUsersWithMatchData });
   } catch (error) {
     console.error("getMatchedUsers Error:", error);
     res.status(500).json({ success: false, message: error.message });

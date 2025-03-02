@@ -1,54 +1,68 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 const MatchedCard = ({
-  myProfilePic,
-  matchedUserProfilePic,
-  onProfilePress,
-  onClose,
-  onConversationStart,
-  matchedUser
+    myProfilePic,
+    matchedUserProfilePic,
+    onProfilePress,
+    onClose,
+    onConversationStart,
+    matchedUser
 }) => {
-  
-  return (
-    <View style={styles.overlay}>
-      <LinearGradient colors={["#b25776", "#000"]} style={styles.card}>
-        <Text style={styles.title}>💖 It's a Match! 💖</Text>
-        <Text style={styles.subtitle}>Start a conversation now!</Text>
-        <Text style={styles.subtitle}>Say Hello to "{matchedUser.name}"</Text>
 
-        <View style={styles.profilePicsContainer}>
-          <TouchableOpacity onPress={() => onProfilePress("Profile")}>
-            <Image source={{ uri: myProfilePic }} style={[styles.profilePic, styles.leftPic]} />
-          </TouchableOpacity>
-          {matchedUserProfilePic ? (
-            <TouchableOpacity onPress={() => onProfilePress("matchedProfile")}>
-              <Image
-                source={matchedUserProfilePic.startsWith("file://") ? { uri: matchedUserProfilePic } : require("../assets/image.png")}
-                style={[styles.profilePic, styles.glow,  styles.rightPic]}
-              />
 
-            </TouchableOpacity>
-          ) : (
-            <Text style={styles.errorText}>No image found</Text>
-          )}
-        </View>
+    const fixImageUrl = (url) => {
+    if (!url) return "https://via.placeholder.com/400"; // Placeholder for missing URLs
 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.chatButton} onPress={onConversationStart}>
-            <LinearGradient colors={["#333", "#b25776"]} style={styles.gradientButton}>
-              <Text style={styles.buttonText}>💬 Start Conversation</Text>
+    if (url.startsWith("file:///")) {
+        return url; // Return as is for local file URLs
+    }
+
+    if (url.startsWith("uploads\\") || url.startsWith("uploads/")) {
+        // Construct the full URL for server images
+        return `http://192.168.0.100:5050/${url.replace(/\\/g, "/")}`;
+    }
+    return url; // Return as is for valid HTTP/HTTPS URLs
+};
+
+    return (
+        <View style={styles.overlay}>
+            <LinearGradient colors={["#b25776", "#000"]} style={styles.card}>
+                <Text style={styles.title}>💖 It's a Match! 💖</Text>
+                <Text style={styles.subtitle}>Start a conversation now!</Text>
+                <Text style={styles.subtitle}>Say Hello to "{matchedUser.name}"</Text>
+
+                <View style={styles.profilePicsContainer}>
+                    <TouchableOpacity onPress={() => onProfilePress("Profile")}>
+                        <Image source={{ uri: fixImageUrl(myProfilePic) }} style={[styles.profilePic, styles.leftPic]} />
+                    </TouchableOpacity>
+                    {matchedUserProfilePic ? (
+                        <TouchableOpacity onPress={() => onProfilePress("matchedProfile")}>
+                            <Image
+                                source={{ uri: fixImageUrl(matchedUserProfilePic) }}
+                                style={[styles.profilePic, styles.glow, styles.rightPic]}
+                            />
+                        </TouchableOpacity>
+                    ) : (
+                        <Text style={styles.errorText}>No image found</Text>
+                    )}
+                </View>
+
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity style={styles.chatButton} onPress={onConversationStart}>
+                        <LinearGradient colors={["#333", "#b25776"]} style={styles.gradientButton}>
+                            <Text style={styles.buttonText}>💬 Start Conversation</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                        <Text style={styles.gradientCloseButton}>❌</Text>
+                    </TouchableOpacity>
+                </View>
             </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <Text style={styles.gradientCloseButton}>❌</Text>
-          </TouchableOpacity>
         </View>
-      </LinearGradient>
-    </View>
-  );
+    );
 };
 
 const styles = StyleSheet.create({

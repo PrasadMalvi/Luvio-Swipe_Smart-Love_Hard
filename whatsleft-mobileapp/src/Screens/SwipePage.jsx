@@ -48,7 +48,7 @@ const SwipePage = ({ navigation }) => {
   const loggedInUserId = useSelector((state) => state.auth.user?._id);
   const [matchedUser, setMatchedUser] = useState(null);
   const [showProfileDetails, setShowProfileDetails] = useState(null);
-  const baseUrl = "http://192.168.0.101:5050/";
+  const baseUrl = "http://192.168.0.100:5050/";
   const getIconName = (field) => {
     switch (field) {
       case "occupation":
@@ -131,27 +131,24 @@ const SwipePage = ({ navigation }) => {
 
   const fetchUserProfilePic = async () => {
     try {
-      const token = await AsyncStorage.getItem("authToken");
-      setAuthToken(token);
-      const res = await axiosInstance.get("/Authentication/getUser", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (
-        res.data.success &&
-        res.data.user &&
-        res.data.user.profilePictures &&
-        res.data.user.profilePictures.length > 0
-      ) {
-        let profilePicUrl = res.data.user.profilePictures[0];
-        // Replace backslashes and add base URL
-        profilePicUrl = baseUrl + profilePicUrl.replace(/\\/g, "/");
-
-        setUserProfilePic(profilePicUrl);
-      }
+        const token = await AsyncStorage.getItem("authToken");
+        setAuthToken(token);
+        const res = await axiosInstance.get("/Authentication/getUser", {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (
+            res.data.success &&
+            res.data.user &&
+            res.data.user.profilePictures &&
+            res.data.user.profilePictures.length > 0
+        ) {
+            let profilePicUrl = res.data.user.profilePictures[0];
+            setUserProfilePic(profilePicUrl); // Set without adding baseUrl here
+        }
     } catch (error) {
-      console.error("Error fetching user profile pic:", error);
+        console.error("Error fetching user profile pic:", error);
     }
-  };
+};
 
   useEffect(() => {
     if (users.length > 0 && index === users.length - 1 && !noProfilesLoading) {
@@ -222,7 +219,9 @@ const SwipePage = ({ navigation }) => {
               { headers: { Authorization: `Bearer ${token}` } }
             );
             if (response.data.success) {
+              console.log("Swipe action success:", direction, response.data); 
               dispatch(likeUser(users[index]));
+              console.log("Match endpoint URL:", `${axiosInstance.defaults.baseURL}/Swipe/match`);
               const responseMatch = await axiosInstance.post(
                 "/Swipe/match",
                 { matchedUserId: targetUserId },
@@ -246,8 +245,9 @@ const SwipePage = ({ navigation }) => {
               { headers: { Authorization: `Bearer ${token}` } }
             );
             if (response.data.success) {
+              console.log("Swipe action success:", direction, response.data); 
               dispatch(superLikeUser(users[index]));
-              const matchResponse = await axiosInstance.post(
+              const responseMatch = await axiosInstance.post(
                 "/Swipe/match",
                 { matchedUserId: targetUserId },
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -263,16 +263,20 @@ const SwipePage = ({ navigation }) => {
               }
             }
             break;
-          case "dislike":
-            response = await axiosInstance.post(
-              "/Swipe/dislike",
-              { dislikedUserId: targetUserId },
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            if (response.data.success) {
-              dispatch(dislikeUser(users[index]));
-            }
-            break;
+            case "dislike":
+              try {
+                  response = await axiosInstance.post(
+                      "/Swipe/dislike",
+                      { dislikedUserId: targetUserId },
+                      { headers: { Authorization: `Bearer ${token}` } }
+                  );
+                  if (response.data.success) {
+                      dispatch(dislikeUser(users[index]));
+                  }
+              } catch (error) {
+                  console.error("Dislike action error:", error); // Log the error here
+              }
+              break;
           case "block":
             response = await axiosInstance.post(
               "/Swipe/block",
@@ -364,7 +368,7 @@ const SwipePage = ({ navigation }) => {
       return url;
     }
     if (!url.startsWith("http")) {
-      return `http://192.168.0.101:5050/${url}`;
+      return `http://192.168.0.100:5050/${url}`;
     }
     return url;
   };

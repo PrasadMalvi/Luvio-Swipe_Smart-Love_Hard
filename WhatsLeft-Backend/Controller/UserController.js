@@ -4,7 +4,7 @@ const JWT = require("jsonwebtoken");
 const otpService = require("../Utils/OtpService");
 const fs = require("fs");
 const path = require("path");
-const { io } = require("../Server");
+const socket = require("../Socket");
 
 // Sign-Up Controller
 const signUpController = async (req, res) => {
@@ -160,7 +160,7 @@ const signUpController = async (req, res) => {
     });
 
     await newUser.save();
-
+    const io = socket.getIO();
     io.emit("newUser", {
       id: newUser._id,
       name: newUser.name,

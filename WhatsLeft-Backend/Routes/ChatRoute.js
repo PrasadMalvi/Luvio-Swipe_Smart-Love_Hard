@@ -23,7 +23,7 @@ const {
 const router = express.Router();
 
 router.post(
-  "/sendMessage",
+  "/sendMessage/:userId",
   authenticate,
   uploadMiddleware.single("media"), // Use the middleware
   validateSendMessage, // Use validation middleware.
@@ -33,7 +33,7 @@ router.get("/getMyChats", authenticate, getMyChats);
 router.post("/markAsSeen", authenticate, markAsSeen);
 router.post("/logCall", authenticate, logCall);
 router.get("/getCallLogs", authenticate, getCallLogs);
-router.get("/getChat/:chatId", authenticate, getChat);
+router.get("/getChat/:userId", authenticate, getChat);
 router.delete("/deleteMessage/:messageId", authenticate, deleteMessage);
 router.put("/editMessage/:messageId", authenticate, editMessage);
 router.get("/getUnreadCount", authenticate, getUnreadCount);

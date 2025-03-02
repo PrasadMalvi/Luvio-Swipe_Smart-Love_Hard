@@ -13,7 +13,7 @@ import ProfilePage from "./src/Screens/ProfilePage";
 import SettingsPage from "./src/Screens/SettingsPage";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import EditProfile from "./src/Screens/EditProfile";
-import MyChats from "./src/Screens/MyChats";
+import MyChats from "./src/Components/Chats/MyChats";
 import ExplorePage from "./src/Screens/ExplorePage";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
