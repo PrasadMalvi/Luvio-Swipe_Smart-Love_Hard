@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, ScrollView, Image, Modal, Alert, Platform, ActionSheetIOS, Animated, PanResponder, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, ScrollView, Image, Modal, Alert, Platform, ActionSheetIOS } from 'react-native';
 import axiosInstance, { setAuthToken } from '../../Redux/slices/axiosSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -10,7 +10,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 import { io } from 'socket.io-client';
 import moment from 'moment';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-const { height: screenHeight } = Dimensions.get('window');
+
 const MyChats = ({ route, navigation }) => {
   const { user } = route.params;
   const [messages, setMessages] = useState([]);
@@ -23,27 +23,7 @@ const MyChats = ({ route, navigation }) => {
   const [chatId, setChatId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [renderTrigger, setRenderTrigger] = useState(false);
-  const translateY = useRef(new Animated.Value(screenHeight)).current; // Start off-screen
-  const panResponder = useRef(
-      PanResponder.create({
-          onStartShouldSetPanResponder: () => true,
-          onPanResponderMove: (_, gestureState) => {
-              if (gestureState.dy > 0) { // Only allow dragging downwards
-                  translateY.setValue(gestureState.dy);
-              }
-          },
-          onPanResponderRelease: (_, gestureState) => {
-              if (gestureState.dy > screenHeight / 4) { // Threshold for closing
-                  closeMoreOptions();
-              } else {
-                  Animated.spring(translateY, {
-                      toValue: 0,
-                      useNativeDriver: true,
-                  }).start();
-              }
-          },
-      })
-  ).current;
+
   useEffect(() => {
     if (chatId) {
       const newSocket = io('http://localhost:5050', { transports: ['websocket'] });
@@ -214,22 +194,6 @@ const MyChats = ({ route, navigation }) => {
     setMoreOptionsVisible(false);
     Alert.alert('Option Selected', `${option} functionality not implemented yet.`);
   };
-  const openMoreOptions = () => {
-    setMoreOptionsVisible(true);
-    Animated.spring(translateY, { // Animate the modal in from the bottom
-        toValue: 0,
-        useNativeDriver: true,
-    }).start();
-};
-
-const closeMoreOptions = () => {
-    Animated.timing(translateY, { // Animate the modal out to the bottom
-        toValue: screenHeight,
-        duration: 300,
-        useNativeDriver: true,
-    }).start(() => setMoreOptionsVisible(false));
-};
-
 
   const isSameDay = (date1, date2) => {
     return moment(date1).isSame(date2, 'day');
@@ -344,26 +308,47 @@ const closeMoreOptions = () => {
         >
           <FontAwesome5 name="paper-plane" size={24} color="#b25776" />
         </TouchableOpacity>
-        </View>
 
-        <Modal visible={moreOptionsVisible} transparent animationType="none">
-                <Animated.View style={[styles.modalContainer, { transform: [{ translateY }] }]} {...panResponder.panHandlers}>
-                    <View style={styles.modalContent}>
-              <TouchableOpacity onPress={() => handleMoreOptions('Unmatch')} style={styles.modalOption}>
-                <Text style={styles.modalOptionText}>Unmatch</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleMoreOptions('Block')} style={styles.modalOption}>
-                <Text style={styles.modalOptionText}>Block</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleMoreOptions('Report')} style={styles.modalOption}>
-                <Text style={styles.modalOptionText}>Report</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setMoreOptionsVisible(false)} style={styles.modalOption}>
-                <Text style={styles.modalOptionText}>Cancel</Text>
-              </TouchableOpacity>
-              </View>
-                </Animated.View>
-            </Modal>
+        <Modal visible={moreOptionsVisible} transparent animationType="slide">
+    <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+            <TouchableOpacity onPress={() => handleMoreOptions('Unmatch')} style={styles.modalOption}>
+                <View style={styles.optionRow}>
+                    <MaterialIcons name="cancel" size={30} color="#b25776" />
+                    <View style={styles.textContainer}>
+                        <Text style={styles.modalOptionText}>Unmatch With {user.name}</Text>
+                        <Text style={styles.optionText}>No longer interested? Umatch them from your Matches...</Text>
+                    </View>
+                </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleMoreOptions('Block')} style={styles.modalOption}>
+                <View style={styles.optionRow}>
+                    <MaterialIcons name="block" size={30} color="#777" />
+                    <View style={styles.textContainer}>
+                        <Text style={styles.modalOptionText}>Block {user.name}</Text>
+                        <Text style={styles.optionText}>You wont be able to see them, and they wont be able to see you.</Text>
+                    </View>
+                </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleMoreOptions('Report')} style={styles.modalOption}>
+                <View style={styles.optionRow}>
+                    <MaterialIcons name="report" size={30} color="red" />
+                    <View style={styles.textContainer}>
+                        <Text style={styles.modalOptionText}>Report {user.name}</Text>
+                        <Text style={styles.optionText}>Dont worry - We wont tell {user.name}</Text>
+                    </View>
+                </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setMoreOptionsVisible(false)} style={styles.modalOption}>
+                <View style={styles.optionRow1}>
+                    <MaterialIcons name="close" size={30} color="red" />
+                    <Text style={styles.modalOptionText}>Cancel</Text>                 
+                </View>
+            </TouchableOpacity>
+        </View>
+    </View>
+</Modal>
+      </View>
 
       {selectedProfile && (
         <ProfileCard user={selectedProfile} onClose={() => setSelectedProfile(null)} />
@@ -385,11 +370,6 @@ const styles = StyleSheet.create({
     borderBottomColor: '#333',
     marginTop: 30,
     justifyContent: 'space-between',
-},
-modalContainer: {
-  flex: 1,
-  justifyContent: 'flex-end',
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
 },
 rightHeaderButtons: {
     flexDirection: 'row',
@@ -457,6 +437,7 @@ rightHeaderButtons: {
   moreOption: {
     padding: 10,
     marginLeft: -10,
+    marginRight: -10,
   },
   camera: {
     padding: 10,
@@ -500,11 +481,28 @@ rightHeaderButtons: {
     paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#333',
-  },
-  modalOptionText: {
+},
+optionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 15,
+},
+optionRow1: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent:"center"
+},
+modalOptionText: {
     color: '#fff',
-    fontSize: 16,
-  },
+    fontSize: 20,
+},
+optionText: {
+    color: '#888',
+    fontSize: 15,
+},
+textContainer: {
+    flex: 1, // Allow the text container to take up remaining space
+},
   dateSeparator: {
     color: '#888',
     textAlign: 'center',
