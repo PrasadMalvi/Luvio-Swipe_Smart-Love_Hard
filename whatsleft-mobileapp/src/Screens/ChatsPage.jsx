@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
-import ProfileCard from './ProfileCard';
+import ProfileCard from '../Components/Profiles/ProfileCard';
 import axiosInstance, { setAuthToken } from "../Redux/slices/axiosSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";

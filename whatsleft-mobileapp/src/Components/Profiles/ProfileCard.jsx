@@ -1,12 +1,89 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, Animated, PanResponder, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import * as Location from 'expo-location'; // Import location services
+
+const { height: screenHeight } = Dimensions.get('window');
 
 const ProfileCard = ({ user, onClose }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const translateY = useRef(new Animated.Value(screenHeight)).current;
+    const panResponder = useRef(
+        PanResponder.create({
+            onStartShouldSetPanResponder: () => true,
+            onPanResponderMove: (_, gestureState) => {
+                if (gestureState.dy > 0) {
+                    translateY.setValue(gestureState.dy);
+                }
+            },
+            onPanResponderRelease: (_, gestureState) => {
+                if (gestureState.dy > screenHeight / 4) {
+                    Animated.timing(translateY, {
+                        toValue: screenHeight,
+                        duration: 300,
+                        useNativeDriver: true,
+                    }).start(onClose);
+                } else {
+                    Animated.timing(translateY, {
+                        toValue: 0,
+                        duration: 200,
+                        useNativeDriver: true,
+                    }).start();
+                }
+            },
+        })
+    ).current;
 
+    const [userLocation, setUserLocation] = useState(null);
+    const [distance, setDistance] = useState(null);
+
+    useEffect(() => {
+        (async () => {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                console.error('Permission to access location was denied');
+                return;
+            }
+
+            let location = await Location.getCurrentPositionAsync({});
+            setUserLocation(location.coords);
+            if (user?.locationCoordinates) {
+                calculateDistance(location.coords, user.locationCoordinates);
+            } else {
+                const electronicCityCoordinates = { latitude: 12.8452, longitude: 77.6602 };
+                calculateDistance(location.coords, electronicCityCoordinates);
+            }
+
+
+        })();
+
+        Animated.timing(translateY, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
+
+    }, [user]);
+
+    const calculateDistance = (currentLocation, targetLocation) => {
+        const toRadians = (angle) => (angle * Math.PI) / 180;
+        const earthRadiusKm = 6371;
+
+        const dLat = toRadians(targetLocation.latitude - currentLocation.latitude);
+        const dLon = toRadians(targetLocation.longitude - currentLocation.longitude);
+
+        const lat1 = toRadians(currentLocation.latitude);
+        const lat2 = toRadians(targetLocation.latitude);
+
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const calculatedDistance = earthRadiusKm * c;
+        setDistance(calculatedDistance.toFixed(2));
+    };
+    
   const getIconName = (field) => {
     switch (field) {
       case "occupation":
@@ -73,12 +150,10 @@ const handlePrevImage = () => {
 };
 
 return (
-    <View style={styles.overlay}>
-        <View style={styles.card}>
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                <Text style={styles.closeButtonText}>X</Text>
-            </TouchableOpacity>
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
+    <Animated.View style={[styles.overlay, { transform: [{ translateY }] }]}>
+    <View style={styles.card} {...panResponder.panHandlers}>
+        <View style={styles.dragIndicator} />
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.profileContainer}>
                     <View style={styles.imageContainer}>
                         <View style={styles.imageIndicatorContainer}>
@@ -94,15 +169,31 @@ return (
                             </>
                         )}
                         <View style={styles.profileInfoGradient}>
-                            <LinearGradient colors={["rgba(0,0,0,1)", "rgba(0,0,0,0.65)", "transparent"]} start={{ x: 0.5, y: 1 }} end={{ x: 0.5, y: 0 }} style={styles.profileInfoGradientContent}>
+                        <LinearGradient
+                            colors={["rgba(0,0,0,0.8)", "rgba(0,0,0,0.5)", "transparent"]}
+                            start={{ x: 0.5, y: 1 }}
+                            end={{ x: 0.5, y: 0 }}
+                            style={styles.profileInfoGradientContent}
+                        >
+                            <View style={styles.userInfoContainer}>
                                 <Text style={styles.userNameAge}>
                                     {user?.name}, {new Date().getFullYear() - new Date(user?.age).getFullYear()}
-                                    <View  style={styles.verifyIcon}>
-                          <MaterialIcons name="verified" size={22} color="#b25776"/>
-                          </View>
+                                    <View style={styles.verifyIcon}>
+                                        <MaterialIcons name="verified" size={30} color="#b25776" />
+                                    </View>
                                 </Text>
-                            </LinearGradient>
-                        </View>
+                                <View style={styles.distanceContainer}>
+                                    <MaterialIcons name="near-me" size={22} color="#b25776" />
+                                    <Text style={styles.userDistance}>{distance ? `${distance} km away` : 'Calculating distance...'}</Text>
+                                </View>
+                                <View style={styles.locationContainer}>
+                                    <MaterialIcons name="location-on" size={22} color="#b25776" />
+                                    <Text style={styles.userLocation}>{user?.location}</Text>
+                                </View>
+                                
+                            </View>
+                        </LinearGradient>
+                    </View>
                     </View>
                     <View style={styles.sectionContainer}>
                         {["lookingFor", "relationshipPreference"].map((field, idx) => user?.[field] && (
@@ -133,7 +224,7 @@ return (
                     <View style={styles.sectionContainer}>
                         <Text style={styles.sectionTitle}>Basic Info</Text>
                         <View style={styles.horizontalLine} />
-                        {["occupation", "location", "height", "sexualOrientation", "gender", "zodiacSign"].map((field, idx, array) => user?.[field] && (
+                        {["occupation", "height", "sexualOrientation", "gender", "zodiacSign"].map((field, idx, array) => user?.[field] && (
                             <React.Fragment key={idx}>
                                 <View style={styles.section}>
                                     <View style={styles.iconTitleContainer}>
@@ -199,34 +290,42 @@ return (
                             ))}
                         </View>
                     </View>
-                </ScrollView>
+                    </ScrollView>
             </View>
-        </View>
+        </Animated.View>
     );
 };
 
 const styles = StyleSheet.create({
     overlay: {
         position: 'absolute',
-        top: 40,
         left: 0,
         right: 0,
         bottom: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
         zIndex: 100,
-        backgroundColor:"#222",
-        borderTopRightRadius:40,
-        borderTopLeftRadius:40,
+        backgroundColor: "#222",
+        borderTopRightRadius: 40,
+        borderTopLeftRadius: 40,
+        height: screenHeight,
     },
     card: {
-        borderTopRightRadius:40,
-        borderTopLeftRadius:40,
-        width: 390,
+        borderTopRightRadius: 40,
+        borderTopLeftRadius: 40,
+        width: "100%",
         backgroundColor: '#222',
         alignItems: 'center',
+        flex: 1,
     },
+    dragIndicator: {
+        width: 60,
+        height: 5,
+        backgroundColor: 'gray',
+        borderRadius: 2.5,
+        marginTop: 10,
+        marginBottom: 10,
+    },
+
     closeButton: {
         position: 'absolute',
         top: 2,
@@ -245,6 +344,7 @@ const styles = StyleSheet.create({
         width: 350,
         height: 500,
         marginTop: 30,
+        borderRadius: 10,
     },
     profileImage: {
         width: "100%",
@@ -272,22 +372,54 @@ const styles = StyleSheet.create({
         right: -5,
         zIndex: 10,
     },
+    profileInfoGradient: {
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 10,
+    },
     profileInfoGradientContent: {
-        paddingVertical: 15,
-        paddingHorizontal: 15,
-        borderRadius: 10,
-        alignItems: "flex-start",
-        paddingBottom: 70
+        padding: 20,
+        alignItems: "center",
+    },
+    userInfoContainer: {
+        flex: 1,
+        flexDirection: 'column', // Arranging items vertically
+        justifyContent: 'flex-start', // Aligning to the top
     },
     userNameAge: {
         color: "white",
-        fontSize: 25,
+        fontSize: 30,
         fontWeight: "bold",
+        marginLeft: 10, // Added spacing
     },
-    verifyIcon:{
-        marginLeft: 140,
-        marginTop: 13,
-      },
+    verifyIcon: {
+        marginLeft: 10,
+        marginTop: 5, // Added spacing
+    },
+    locationContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 5, // Added spacing
+        marginLeft: 55, // Added spacing
+
+    },
+    distanceContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginLeft: 40, // Added spacing
+    },
+    userLocation: {
+        color: "white",
+        fontSize: 16,
+        marginLeft: 5, // Added spacing
+    },
+    userDistance: {
+        color: "white",
+        fontSize: 16,
+        marginLeft: 5, // Added spacing
+    },
     section: { marginBottom: 10, backgroundColor: "none", borderRadius: 5 },
     sectionContainer: {
         marginTop: 10,

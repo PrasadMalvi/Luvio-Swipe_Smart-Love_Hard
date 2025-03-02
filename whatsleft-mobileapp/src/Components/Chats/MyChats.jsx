@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, ScrollView, Image, Modal, Alert, Platform, ActionSheetIOS } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, ScrollView, Image, Modal, Alert, Platform, ActionSheetIOS, Animated, PanResponder, Dimensions } from 'react-native';
 import axiosInstance, { setAuthToken } from '../../Redux/slices/axiosSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import ProfileCard from '../../Screens/ProfileCard';
+import ProfileCard from '../Profiles/ProfileCard';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
 import { io } from 'socket.io-client';
 import moment from 'moment';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-
+const { height: screenHeight } = Dimensions.get('window');
 const MyChats = ({ route, navigation }) => {
   const { user } = route.params;
   const [messages, setMessages] = useState([]);
@@ -23,7 +23,27 @@ const MyChats = ({ route, navigation }) => {
   const [chatId, setChatId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [renderTrigger, setRenderTrigger] = useState(false);
-
+  const translateY = useRef(new Animated.Value(screenHeight)).current; // Start off-screen
+  const panResponder = useRef(
+      PanResponder.create({
+          onStartShouldSetPanResponder: () => true,
+          onPanResponderMove: (_, gestureState) => {
+              if (gestureState.dy > 0) { // Only allow dragging downwards
+                  translateY.setValue(gestureState.dy);
+              }
+          },
+          onPanResponderRelease: (_, gestureState) => {
+              if (gestureState.dy > screenHeight / 4) { // Threshold for closing
+                  closeMoreOptions();
+              } else {
+                  Animated.spring(translateY, {
+                      toValue: 0,
+                      useNativeDriver: true,
+                  }).start();
+              }
+          },
+      })
+  ).current;
   useEffect(() => {
     if (chatId) {
       const newSocket = io('http://localhost:5050', { transports: ['websocket'] });
@@ -194,6 +214,22 @@ const MyChats = ({ route, navigation }) => {
     setMoreOptionsVisible(false);
     Alert.alert('Option Selected', `${option} functionality not implemented yet.`);
   };
+  const openMoreOptions = () => {
+    setMoreOptionsVisible(true);
+    Animated.spring(translateY, { // Animate the modal in from the bottom
+        toValue: 0,
+        useNativeDriver: true,
+    }).start();
+};
+
+const closeMoreOptions = () => {
+    Animated.timing(translateY, { // Animate the modal out to the bottom
+        toValue: screenHeight,
+        duration: 300,
+        useNativeDriver: true,
+    }).start(() => setMoreOptionsVisible(false));
+};
+
 
   const isSameDay = (date1, date2) => {
     return moment(date1).isSame(date2, 'day');
@@ -251,7 +287,9 @@ const MyChats = ({ route, navigation }) => {
           {user.matchedAt && ( // Check if matchedAt exists
               <Text style={styles.emptyChatTime}>{calculateTimeDifference(user.matchedAt)}</Text>
           )}
+          <TouchableOpacity onPress={() => setSelectedProfile(user)}>
           <Image source={{ uri: fixImageUrl(user.profilePictures[0]) }} style={styles.emptyChatPic} />
+          </TouchableOpacity>
           <Text style={styles.emptyChatText}>Start Conversation and</Text>
           <Text style={styles.emptyChatText}>plan for a Date ❤️!</Text>
       </View>
@@ -306,10 +344,11 @@ const MyChats = ({ route, navigation }) => {
         >
           <FontAwesome5 name="paper-plane" size={24} color="#b25776" />
         </TouchableOpacity>
+        </View>
 
-        <Modal visible={moreOptionsVisible} transparent animationType="slide">
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
+        <Modal visible={moreOptionsVisible} transparent animationType="none">
+                <Animated.View style={[styles.modalContainer, { transform: [{ translateY }] }]} {...panResponder.panHandlers}>
+                    <View style={styles.modalContent}>
               <TouchableOpacity onPress={() => handleMoreOptions('Unmatch')} style={styles.modalOption}>
                 <Text style={styles.modalOptionText}>Unmatch</Text>
               </TouchableOpacity>
@@ -322,10 +361,9 @@ const MyChats = ({ route, navigation }) => {
               <TouchableOpacity onPress={() => setMoreOptionsVisible(false)} style={styles.modalOption}>
                 <Text style={styles.modalOptionText}>Cancel</Text>
               </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-      </View>
+              </View>
+                </Animated.View>
+            </Modal>
 
       {selectedProfile && (
         <ProfileCard user={selectedProfile} onClose={() => setSelectedProfile(null)} />
@@ -347,6 +385,11 @@ const styles = StyleSheet.create({
     borderBottomColor: '#333',
     marginTop: 30,
     justifyContent: 'space-between',
+},
+modalContainer: {
+  flex: 1,
+  justifyContent: 'flex-end',
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
 },
 rightHeaderButtons: {
     flexDirection: 'row',
