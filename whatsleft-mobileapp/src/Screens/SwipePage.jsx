@@ -453,10 +453,6 @@ const SwipePage = ({ navigation }) => {
                         </Text>
                       </LinearGradient>
                     </View>
-                    <View style={styles.scrollDown}>
-                          <Text style={{color:"yellow"}}>Scroll Down</Text>
-                          <Icon6 name="circle-down" size={25} color="yellow" />
-                        </View>
                   </View>
                   
                  

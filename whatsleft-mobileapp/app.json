@@ -4,20 +4,20 @@
     "slug": "whatsleft-mobileapp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo5.png",
+    "icon": "./assets/SMMLogo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/logo5.png",
+      "image": "./assets/SMMLogo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#fff"
+      "backgroundColor": "#ef2d7d"
     },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo5.png",
+        "foregroundImage": "./assets/SMMLogo.png",
         "backgroundColor": "#fff"
       }
     },
