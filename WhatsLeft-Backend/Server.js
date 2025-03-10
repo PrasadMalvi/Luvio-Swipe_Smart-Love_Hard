@@ -28,6 +28,7 @@ const io = socket.init(server, JWT_SECRET); // Initialize Socket.IO
 app.use("/Authentication", require("./Routes/UserRoute"));
 app.use("/Swipe", require("./Routes/SwipeRoute"));
 app.use("/Chat", require("./Routes/ChatRoute"));
+app.use("/faceRecognition", require("./Routes/faceRecognitionRoute"));
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 

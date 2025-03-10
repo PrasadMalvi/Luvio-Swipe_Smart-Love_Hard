@@ -15,12 +15,17 @@ import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import axiosInstance from "../Redux/slices/axiosSlice";
 import ProfilePageSkeletonLoader from "../Components/Skeleton/ProfilePageSkeletonLoader";
-
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Octicons from 'react-native-vector-icons/Octicons';
+import { Platform } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 
 const ProfileScreen = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isVerified, setIsVerified] = useState(false); // Add verification state
+  const [verificationLoading, setVerificationLoading] = useState(false);
   const navigation = useNavigation();
   const getIconName = (field) => {
     switch (field) {
@@ -109,6 +114,44 @@ const ProfileScreen = () => {
     return url; // Return absolute HTTP URL as is
   };
 
+  const verifyFace = async () => {
+    setVerificationLoading(true);
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+            alert('Sorry, we need camera permissions to make this work!');
+            return;
+        }
+      let result = await ImagePicker.launchCameraAsync({
+        base64: true,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.5,
+        cameraType: ImagePicker.CameraType.front
+      });
+  
+      if (!result.canceled) {
+          const response = await axiosInstance.post('/faceRecognition/verify', {
+              userId: user._id,
+              selfie: result.assets[0].base64,
+          });
+
+          if (response.data.verified) {
+              setIsVerified(true);
+              // Optionally update the user object or database to reflect verification
+              // Example: await axiosInstance.put('/users/verify', { userId: user._id });
+          } else {
+              alert('Verification failed. Please try again.');
+          }
+      }
+    } catch (error) {
+        console.error('Verification error:', error);
+        alert('An error occurred during verification.');
+    } finally {
+        setVerificationLoading(false);
+    }
+  };
+
   if (loading)
     return (
       <ProfilePageSkeletonLoader />
@@ -163,6 +206,23 @@ const ProfileScreen = () => {
                 >
                   <Text style={styles.userNameAge}>
                     {user?.name}, {new Date().getFullYear() - new Date(user?.age).getFullYear()}
+                    <View style={styles.verifyIcon}>
+                      {isVerified ? (
+                        <MaterialIcons name="verified" size={22} color="#b25776" />
+                      ) : (
+                        <TouchableOpacity
+                          style={styles.verifyButton}
+                          onPress={verifyFace}
+                          disabled={verificationLoading}
+                        >
+                          {verificationLoading ? (
+                            <ActivityIndicator color="white" />
+                          ) : (
+                            <Octicons style={styles.unverifiedButton} name="unverified" size={20} color="red" />
+                          )}
+                        </TouchableOpacity>
+                      )}
+                    </View>                                         
                   </Text>
                 </LinearGradient>
               </View>
@@ -365,6 +425,18 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: "bold",
   },
+  verifyIcon:{
+    marginLeft: 0,
+    marginTop: 13,
+  },
+  unverifiedButton: {
+      marginLeft: 0,
+      marginTop: -2,
+    },
+    verifyButton: {
+      padding: 0,
+      backgroundColor: 'transparent',
+    },
   name: { fontSize: 24, fontWeight: "bold", color: "white", textAlign: "center" },
   age: { fontSize: 18, color: "#ccc", textAlign: "center", marginBottom: 10 },
   section: { marginBottom: 10, backgroundColor: "none", borderRadius: 5 },
