@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 const MatchedCard = ({
     myProfilePic,
@@ -26,10 +27,19 @@ const MatchedCard = ({
     return url; // Return as is for valid HTTP/HTTPS URLs
 };
 
+
+
+
+
     return (
         <View style={styles.overlay}>
             <LinearGradient colors={["#b25776", "#000"]} style={styles.card}>
                 <Text style={styles.title}>💖 It's a Match! 💖</Text>
+                <DotLottieReact
+      src="https://lottie.host/750f00ae-4787-478e-bd77-a86e35fdfa4b/uoqUNu7K7q.lottie"
+      loop
+      autoplay
+    />
                 <Text style={styles.subtitle}>Start a conversation now!</Text>
                 <Text style={styles.subtitle}>Say Hello to "{matchedUser.name}"</Text>
 

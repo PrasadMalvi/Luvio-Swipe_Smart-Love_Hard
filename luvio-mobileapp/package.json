@@ -10,6 +10,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@lottiefiles/dotlottie-react": "^0.13.2",
     "@ptomasroos/react-native-multi-slider": "^2.2.2",
     "@react-native-async-storage/async-storage": "^2.1.1",
     "@react-native-community/datetimepicker": "8.2.0",
@@ -36,6 +37,7 @@
     "react-native-gesture-handler": "~2.20.2",
     "react-native-image-picker": "^8.2.0",
     "react-native-linear-gradient": "^2.8.3",
+    "react-native-maps": "1.18.0",
     "react-native-multiple-select": "^0.5.12",
     "react-native-paper": "^5.13.1",
     "react-native-reanimated": "~3.16.1",
@@ -48,8 +50,7 @@
     "react-redux": "^9.2.0",
     "redux": "^5.0.1",
     "socket.io-client": "^4.8.1",
-    "yup": "^1.6.1",
-    "react-native-maps": "1.18.0"
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

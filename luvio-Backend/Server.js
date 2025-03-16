@@ -1,4 +1,3 @@
-// Server.js
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -12,8 +11,10 @@ const Chat = require("./Models/ChatsModule"); // Import Chat model
 dotenv.config();
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// Increase payload size limit
+app.use(express.json({ limit: "50mb" })); // Increase JSON request size
+app.use(express.urlencoded({ limit: "50mb", extended: true })); // Increase URL-encoded request size
 app.use(cors({ origin: "http://192.168.0.100:5050" }));
 
 const PORT = process.env.PORT || 5051;

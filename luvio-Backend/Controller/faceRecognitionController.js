@@ -1,130 +1,133 @@
-// controllers/verificationController.js
 const faceapi = require("face-api.js");
 const fs = require("fs");
+const path = require("path");
 const canvas = require("canvas");
 const { Canvas, Image, ImageData } = canvas;
-faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
-const User = require("../Models/UserModule"); // Import your User model
-const https = require("https");
+faceapi.env.monkeyPatch(canvas);
 
+const User = require("../Models/UserModule");
+
+const MODEL_PATH = path.join(__dirname, "../face_models");
+let modelsLoaded = false;
+
+// Load FaceAPI models
 async function loadModels() {
-  await faceapi.nets.TinyFaceDetector.loadFromDisk("./models");
-  await faceapi.nets.FaceLandmark68Net.loadFromDisk("./models");
-  await faceapi.nets.FaceRecognitionNet.loadFromDisk("./models");
+  if (modelsLoaded) return;
+  try {
+    await Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromDisk(MODEL_PATH),
+      faceapi.nets.faceLandmark68Net.loadFromDisk(MODEL_PATH),
+      faceapi.nets.faceRecognitionNet.loadFromDisk(MODEL_PATH),
+    ]);
+    console.log("✅ FaceAPI Models Loaded Successfully");
+    modelsLoaded = true;
+  } catch (error) {
+    console.error("❌ Error loading FaceAPI models:", error);
+  }
 }
 
-async function loadImageFromUrl(url) {
-  return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
-      const chunks = [];
-      res.on("data", (chunk) => chunks.push(chunk));
-      res.on("end", () => {
-        resolve(canvas.loadImage(Buffer.concat(chunks)));
-      });
-      res.on("error", reject);
-    });
-  });
+// Load image from local path or URL
+async function loadImage(imagePath) {
+  try {
+    if (imagePath.startsWith("file://")) {
+      imagePath = imagePath.replace("file://", "");
+    }
+    return await canvas.loadImage(imagePath);
+  } catch (error) {
+    console.error(`❌ Error loading image: ${imagePath}`, error);
+    return null;
+  }
 }
 
+// Load user profile images
 async function loadProfileImages(userId) {
   try {
-    const user = await User.findOne({ _id: userId });
-    if (!user) {
-      throw new Error("User not found");
-    }
+    const user = await User.findById(userId);
+    if (!user) throw new Error("User not found");
 
-    const imageUrls = user.profilePictures;
-
-    if (!imageUrls || imageUrls.length < 4 || imageUrls.length > 9) {
+    const imageUrls = user.profilePictures || [];
+    if (imageUrls.length < 4 || imageUrls.length > 9) {
       throw new Error("Invalid number of profile images.");
     }
 
-    const labeledFaceDescriptors = [];
+    const labeledDescriptors = [];
     for (const imageUrl of imageUrls) {
       try {
-        const image = await loadImageFromUrl(imageUrl);
-        const detection = await faceapi.detectSingleFace(
-          image,
-          new faceapi.TinyFaceDetectorOptions()
-        );
+        const image = await loadImage(imageUrl);
+        if (!image) continue;
+
+        const detection = await faceapi
+          .detectSingleFace(image, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks()
+          .withFaceDescriptor();
+
         if (!detection) {
-          console.error(`No face detected in ${imageUrl}`);
+          console.warn(`⚠️ No face detected in ${imageUrl}`);
           continue;
         }
-        const landmarks = await faceapi.detectFaceLandmarks(image);
-        const descriptor = await faceapi.computeFaceDescriptor(
-          image,
-          landmarks
+
+        labeledDescriptors.push(
+          new faceapi.LabeledFaceDescriptors(userId, [detection.descriptor])
         );
-        labeledFaceDescriptors.push(
-          new faceapi.LabeledFaceDescriptors(userId, [descriptor])
-        );
-      } catch (imageError) {
-        console.error(`Error loading image from ${imageUrl}:`, imageError);
+      } catch (error) {
+        console.error(`❌ Error processing ${imageUrl}:`, error);
       }
     }
 
-    return labeledFaceDescriptors;
+    return labeledDescriptors;
   } catch (error) {
-    console.error("Error loading profile images:", error);
+    console.error("❌ Error loading profile images:", error);
     throw error;
   }
 }
 
-async function verifyFace(userId, selfieImagePath) {
+// Verify face with selfie
+async function verifyFace(userId, selfiePath) {
   await loadModels();
-  const labeledFaceDescriptors = await loadProfileImages(userId);
 
-  if (labeledFaceDescriptors.length === 0) {
-    console.error("No profile images with faces found for the user.");
+  const labeledDescriptors = await loadProfileImages(userId);
+  if (labeledDescriptors.length === 0) {
+    console.error("❌ No valid profile images found.");
     return false;
   }
 
-  const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors);
+  const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors);
 
-  const selfieImage = await canvas.loadImage(selfieImagePath);
-  const selfieDetection = await faceapi.detectSingleFace(
-    selfieImage,
-    new faceapi.TinyFaceDetectorOptions()
-  );
+  const selfieImage = await loadImage(selfiePath);
+  if (!selfieImage) return false;
 
-  if (!selfieDetection) {
-    console.error("No face detected in selfie.");
+  const detection = await faceapi
+    .detectSingleFace(selfieImage, new faceapi.TinyFaceDetectorOptions())
+    .withFaceLandmarks()
+    .withFaceDescriptor();
+
+  if (!detection) {
+    console.error("❌ No face detected in the selfie.");
     return false;
   }
 
-  const selfieLandmarks = await faceapi.detectFaceLandmarks(selfieImage);
-  const selfieDescriptor = await faceapi.computeFaceDescriptor(
-    selfieImage,
-    selfieLandmarks
-  );
-
-  const bestMatch = faceMatcher.findBestMatch(selfieDescriptor);
-
-  if (bestMatch.label === userId && bestMatch.distance < 0.6) {
-    return true;
-  } else {
-    return false;
-  }
+  const bestMatch = faceMatcher.findBestMatch(detection.descriptor);
+  return bestMatch.label === userId && bestMatch.distance < 0.6;
 }
 
+// Process real-time selfie
 async function processRealtimeSelfie(req, res) {
   try {
-    const userId = req.body.userId;
-    const selfieBuffer = Buffer.from(req.body.selfie, "base64");
+    const { userId, selfie } = req.body;
+    if (!userId || !selfie)
+      return res.status(400).json({ error: "❌ Missing required fields" });
 
     const tempFilePath = `temp_selfie_${Date.now()}.jpg`;
-    fs.writeFileSync(tempFilePath, selfieBuffer);
+    fs.writeFileSync(tempFilePath, Buffer.from(selfie, "base64"));
+
     const verificationResult = await verifyFace(userId, tempFilePath);
     fs.unlinkSync(tempFilePath);
 
     res.json({ verified: verificationResult });
   } catch (error) {
-    console.error("Error processing realtime selfie:", error);
+    console.error("❌ Error processing selfie:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
 
-module.exports = {
-  processRealtimeSelfie,
-};
+module.exports = { processRealtimeSelfie };

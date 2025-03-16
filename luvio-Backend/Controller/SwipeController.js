@@ -1,6 +1,6 @@
 const UserData = require("../Models/UserModule");
 const Swipe = require("../Models/SwipeModule");
-const Match = require("../Models/SwipeMatchModue");
+const Match = require("../Models/SwipeMatchModule");
 
 const getUsers = async (req, res) => {
   try {
