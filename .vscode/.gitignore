@@ -1,0 +1,73 @@
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Environment variables
+.env
+.env.*.local
+
+# Editor folders
+.vscode/
+.idea/
+
+# React Native
+*.keystore
+*.jks
+android/app/debug.keystore
+*.gradle
+android/.gradle
+android/build/
+ios/build/
+ios/Pods/
+
+# Expo
+.expo/
+.expo-shared/
+
+# Webpack/Bundling
+dist/
+build/
+
+# Cache
+.cache/
+tmp/
+temp/
+*.tmp
+
+# OS-generated files
+*.swp
+*.swo
+
+# VS Code Workspace
+*.code-workspace
+
+# Test Coverage
+coverage/
+
+# Misc
+*.tgz
+*.gz
+
+# JetBrains Rider
+.idea/
+
+# Luvio Specific (optional)
+luvio-mobileapp/node_modules/
+luvio-webapp/node_modules/
+luvio-Backend/node_modules/
