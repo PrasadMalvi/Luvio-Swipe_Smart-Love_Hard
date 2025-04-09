@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+/* import LottieView from "lottie-react-native"; */
 
 const MatchedCard = ({
     myProfilePic,
@@ -22,7 +23,7 @@ const MatchedCard = ({
 
     if (url.startsWith("uploads\\") || url.startsWith("uploads/")) {
         // Construct the full URL for server images
-        return `http://192.168.0.100:5050/${url.replace(/\\/g, "/")}`;
+        return `http://192.168.156.228:5050/${url.replace(/\\/g, "/")}`;
     }
     return url; // Return as is for valid HTTP/HTTPS URLs
 };
@@ -35,11 +36,13 @@ const MatchedCard = ({
         <View style={styles.overlay}>
             <LinearGradient colors={["#b25776", "#000"]} style={styles.card}>
                 <Text style={styles.title}>💖 It's a Match! 💖</Text>
-                <DotLottieReact
-      src="https://lottie.host/750f00ae-4787-478e-bd77-a86e35fdfa4b/uoqUNu7K7q.lottie"
-      loop
-      autoplay
-    />
+{/*                 <LottieView
+                  source={{ uri: "https://assets8.lottiefiles.com/packages/lf20_myejiggj.json" }} // or use a local file
+                  autoPlay
+                  loop
+                  style={{ width: 200, height: 200 }}
+                /> */}
+
                 <Text style={styles.subtitle}>Start a conversation now!</Text>
                 <Text style={styles.subtitle}>Say Hello to "{matchedUser.name}"</Text>
 
