@@ -1,0 +1,14 @@
+* text=auto
+*.js text
+*.jsx text
+*.ts text
+*.tsx text
+*.json text
+*.lock text
+*.md text
+*.css text
+*.scss text
+*.html text
+*.xml text
+*.sh text eol=lf
+*.flow text
