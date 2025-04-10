@@ -51,6 +51,7 @@ const SwipePage = ({ navigation }) => {
   const [distance, setDistance] = useState(null);
   const loggedInCoords = useSelector((state) => state.location.coords);
   const [resolvedLocations, setResolvedLocations] = useState({});
+  const [profiles, setProfiles] = useState([]);
 
   const baseUrl = "http://192.168.156.228:5050/";
   const getIconName = (field) => {
@@ -95,7 +96,6 @@ const SwipePage = ({ navigation }) => {
         return "question";
     }
   };
-  let fetchUsers;
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -124,6 +124,8 @@ const SwipePage = ({ navigation }) => {
               !superLiked.includes(user._id)
             );
           });
+          console.log("Filtered users after swipe filtering:", filteredUsers);
+
           
           const usersWithDistance = filteredUsers.map((user) => {
             const userLat = user?.location?.latitude;
@@ -152,7 +154,9 @@ const SwipePage = ({ navigation }) => {
               return { ...user, distance: null };
             }
           });
-          
+          console.log('Users after filtering and distance calculation:', usersWithDistance);
+setUsers(usersWithDistance);
+
   
           setUsers(usersWithDistance);
   
@@ -238,15 +242,17 @@ const SwipePage = ({ navigation }) => {
     }
 };
 
-  useEffect(() => {
-    if (users.length > 0 && index === users.length - 1 && !noProfilesLoading) {
-      setNoProfilesLoading(true);
-      setTimeout(() => {
-        setNoProfilesLoading(false);
-        setIndex(index + 1);
-      }, 3000);
-    }
-  }, [index, users.length, noProfilesLoading]);
+useEffect(() => {
+  if (users.length > 0 && index === users.length - 1 && !noProfilesLoading) {
+  setNoProfilesLoading(true);
+  setTimeout(() => {
+    setNoProfilesLoading(false);
+    setIndex(index + 1); // This can cause an out-of-bounds issue if the index is the last one.
+  }, 3000);
+}
+
+}, [index, users.length, noProfilesLoading]);
+
 
   const fetchMatchedUserDetails = async (matchedUserId) => {
     try {

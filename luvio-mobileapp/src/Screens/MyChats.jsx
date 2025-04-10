@@ -214,7 +214,7 @@ const MyChats = ({ route, navigation }) => {
         return url;
     }
     if (url.startsWith("uploads\\") || url.startsWith("uploads/")) {
-        return `http://192.168.42.228:5050/${url.replace(/\\/g, "/")}`;
+        return `http://192.168.156.228:5050/${url.replace(/\\/g, "/")}`;
     }
     return url;
 };
